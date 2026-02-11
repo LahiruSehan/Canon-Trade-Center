@@ -2,21 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- Prevent Search Engine Indexing -->
-    <meta name="robots" content="noindex, nofollow">
-    
-    <title>Admin Dashboard - Canon Trade Center</title>
-
-    <!-- App Icons & Manifest -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
-    <link rel="shortcut icon" href="/favicon.ico" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <!-- PWA / App Standalone Mode Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Canon Admin">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#CC0000">
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Embedded Manifest for PWA (Data URI) -->
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Canon%20Trade%20Center%22%2C%22short_name%22%3A%22Canon%20Admin%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23CC0000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2FKcv18dvK%2FCanon-Trade-Center-Logo-copy.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
+    
+    <title>Canon Admin</title>
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,36 +26,53 @@
     <!-- Phosphor Icons -->
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; user-select: none; }
         
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-        /* Loader Animation */
+        /* Smooth Scrolling & Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* Loader */
         .loader {
             border: 3px solid #f3f3f3;
             border-radius: 50%;
-            border-top: 3px solid #ef4444; /* Canon Red-ish */
-            width: 24px;
-            height: 24px;
-            -webkit-animation: spin 1s linear infinite; /* Safari */
+            border-top: 3px solid #CC0000;
+            width: 24px; height: 24px;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Mobile safe area spacing */
+        /* Utilities */
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
         
-        /* Hide scrollbar for clean mobile horizontal lists if needed */
+        /* Hide scrollbar */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Range Slider Styling */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px; width: 20px;
+            border-radius: 50%;
+            background: #CC0000;
+            margin-top: -8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
     </style>
     
     <script>
@@ -65,10 +81,18 @@
                 extend: {
                     colors: {
                         brand: {
-                            red: '#CC0000', // Canon Red
+                            red: '#CC0000',
                             dark: '#1a1a1a',
                             gray: '#f5f5f5'
                         }
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                        'slide-up': 'slideUp 0.3s ease-out'
+                    },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
+                        slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } }
                     }
                 }
             }
@@ -78,61 +102,55 @@
 <body class="bg-slate-50 text-slate-800 h-screen overflow-hidden flex flex-col md:flex-row">
 
     <!-- LOGIN VIEW -->
-    <div id="login-view" class="fixed inset-0 z-50 bg-slate-50 flex flex-col items-center justify-center p-6 transition-opacity duration-300">
-        <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 transform transition-all">
+    <div id="login-view" class="fixed inset-0 z-[100] bg-slate-50 flex flex-col items-center justify-center p-6 transition-opacity duration-300">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-xl p-8 transform transition-all">
             <div class="flex justify-center mb-8">
-                <img src="https://i.ibb.co/Kcv18dvK/Canon-Trade-Center-Logo-copy.png" alt="Canon Trade Center" class="h-12 object-contain">
+                <img src="https://i.ibb.co/Kcv18dvK/Canon-Trade-Center-Logo-copy.png" alt="Canon" class="h-12 object-contain">
             </div>
-            
             <h2 class="text-2xl font-bold text-center text-slate-800 mb-2">Admin Portal</h2>
-            <p class="text-center text-slate-500 mb-8 text-sm">Sign in to manage your inventory</p>
-            
+            <p class="text-center text-slate-500 mb-8 text-sm">Sign in to manage inventory</p>
             <form id="login-form" class="space-y-5">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Email</label>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Email</label>
                     <div class="relative">
-                        <i class="ph ph-envelope absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="email" id="email" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent transition-all" placeholder="admin@canon.com" required>
+                        <i class="ph ph-envelope absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="email" id="email" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent transition-all font-medium" placeholder="admin@canon.com" required>
                     </div>
                 </div>
-                
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Password</label>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
                     <div class="relative">
-                        <i class="ph ph-lock-key absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
-                        <input type="password" id="password" class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent transition-all" placeholder="••••••••" required>
+                        <i class="ph ph-lock-key absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-lg"></i>
+                        <input type="password" id="password" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-red focus:border-transparent transition-all font-medium" placeholder="••••••••" required>
                     </div>
                 </div>
-
-                <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center gap-2">
+                <button type="submit" class="w-full bg-brand-dark hover:bg-black text-white font-bold py-4 rounded-2xl shadow-lg hover:shadow-xl transform active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-4">
                     <span>Sign In</span>
                     <i class="ph ph-arrow-right font-bold"></i>
                 </button>
             </form>
         </div>
-        <p class="mt-8 text-xs text-slate-400">© 2024 Canon Trade Center</p>
+        <p class="mt-8 text-xs text-slate-400 font-medium">© 2025 Canon Trade Center</p>
     </div>
 
     <!-- DESKTOP SIDEBAR -->
-    <aside id="desktop-sidebar" class="hidden md:flex flex-col w-64 bg-white border-r border-slate-200 h-full">
-        <div class="p-6 border-b border-slate-100 flex items-center gap-3">
+    <aside id="desktop-sidebar" class="hidden md:flex flex-col w-72 bg-white border-r border-slate-200 h-full shadow-sm z-20">
+        <div class="p-8 border-b border-slate-100 flex justify-center">
             <img src="https://i.ibb.co/Kcv18dvK/Canon-Trade-Center-Logo-copy.png" alt="Logo" class="h-8">
         </div>
-        
-        <nav class="flex-1 p-4 space-y-1">
-            <button data-target="products-section" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:bg-slate-50 hover:text-brand-red active-nav">
+        <nav class="flex-1 p-4 space-y-2">
+            <button data-target="products-section" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold rounded-2xl transition-all text-slate-600 hover:bg-slate-50 hover:text-brand-red">
                 <i class="ph ph-camera text-xl"></i> Products
             </button>
-            <button data-target="categories-section" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:bg-slate-50 hover:text-brand-red">
+            <button data-target="categories-section" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold rounded-2xl transition-all text-slate-600 hover:bg-slate-50 hover:text-brand-red">
                 <i class="ph ph-squares-four text-xl"></i> Categories
             </button>
-            <button data-target="orders-section" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-colors text-slate-600 hover:bg-slate-50 hover:text-brand-red">
+            <button data-target="orders-section" class="nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold rounded-2xl transition-all text-slate-600 hover:bg-slate-50 hover:text-brand-red">
                 <i class="ph ph-receipt text-xl"></i> Orders
             </button>
         </nav>
-
-        <div class="p-4 border-t border-slate-100">
-            <button id="logout-btn-desktop" class="w-full flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+        <div class="p-6 border-t border-slate-100">
+            <button id="logout-btn-desktop" class="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 rounded-xl transition-colors">
                 <i class="ph ph-sign-out text-lg"></i> Logout
             </button>
         </div>
@@ -141,35 +159,34 @@
     <!-- MAIN CONTENT AREA -->
     <div id="main-content" class="flex-1 flex flex-col h-full overflow-hidden relative opacity-0 pointer-events-none transition-opacity duration-300">
         
-        <!-- Mobile Header -->
-        <header class="md:hidden h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-20">
-            <img src="https://i.ibb.co/Kcv18dvK/Canon-Trade-Center-Logo-copy.png" alt="Logo" class="h-8">
-            <button id="logout-btn-mobile" class="p-2 text-slate-500 hover:text-red-600 rounded-full hover:bg-slate-100">
+        <!-- Mobile Header (App-like) -->
+        <header class="md:hidden h-14 bg-white/90 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 sticky top-0 z-20 pt-safe">
+            <img src="https://i.ibb.co/Kcv18dvK/Canon-Trade-Center-Logo-copy.png" alt="Logo" class="h-6">
+            <button id="logout-btn-mobile" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-red-600 rounded-full active:bg-slate-100 transition-colors">
                 <i class="ph ph-sign-out text-xl"></i>
             </button>
         </header>
 
-        <!-- Dynamic Title Bar (Desktop) -->
-        <div class="hidden md:flex h-16 bg-white border-b border-slate-200 items-center justify-between px-8">
-            <h1 id="page-title" class="text-xl font-bold text-slate-800">Inventory</h1>
-            <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                <span class="text-xs font-medium text-slate-500">System Online</span>
+        <!-- Desktop Header -->
+        <div class="hidden md:flex h-20 bg-white border-b border-slate-200 items-center justify-between px-10">
+            <h1 id="page-title" class="text-2xl font-bold text-slate-800 tracking-tight">Inventory</h1>
+            <div class="flex items-center gap-2 bg-green-50 px-3 py-1.5 rounded-full border border-green-100">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                <span class="text-xs font-bold text-green-700 uppercase tracking-wider">Online</span>
             </div>
         </div>
 
         <!-- Scrollable Content -->
-        <main class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
+        <main class="flex-1 overflow-y-auto p-4 md:p-10 pb-32 md:pb-10 scroll-smooth">
             
             <!-- PRODUCTS SECTION -->
             <section id="products-section" class="view-section space-y-6">
-                <div class="flex justify-between items-center md:hidden">
-                    <h2 class="text-lg font-bold text-slate-800">Products</h2>
+                <div class="flex justify-between items-center md:hidden pb-2">
+                    <h2 class="text-xl font-bold text-slate-800">Products</h2>
                 </div>
-                
-                <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                     <!-- Products injected here -->
-                    <div class="col-span-full flex justify-center py-12">
+                    <div class="col-span-full flex justify-center py-20">
                         <div class="loader border-slate-200 border-t-slate-800"></div>
                     </div>
                 </div>
@@ -177,77 +194,162 @@
 
             <!-- CATEGORIES SECTION -->
             <section id="categories-section" class="view-section hidden space-y-6">
-                <div class="flex justify-between items-center md:hidden">
-                    <h2 class="text-lg font-bold text-slate-800">Categories</h2>
+                <div class="flex justify-between items-center md:hidden pb-2">
+                    <h2 class="text-xl font-bold text-slate-800">Categories</h2>
                 </div>
-                <div id="categories-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div id="categories-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                     <!-- Categories injected here -->
                 </div>
             </section>
 
             <!-- ORDERS SECTION -->
             <section id="orders-section" class="view-section hidden space-y-6">
-                <div class="flex justify-between items-center md:hidden">
-                    <h2 class="text-lg font-bold text-slate-800">Orders</h2>
+                <div class="flex justify-between items-center md:hidden pb-2">
+                    <h2 class="text-xl font-bold text-slate-800">Orders</h2>
                 </div>
-                <div id="order-list" class="space-y-4">
+                <div id="order-list" class="space-y-4 max-w-4xl mx-auto">
                     <!-- Orders injected here -->
                 </div>
             </section>
 
         </main>
 
-        <!-- Floating Action Button (FAB) -->
-        <button id="fab" class="absolute bottom-28 md:bottom-8 right-4 md:right-8 w-14 h-14 bg-brand-dark hover:bg-brand-red text-white rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all flex items-center justify-center z-30">
+        <!-- Floating Action Button (FAB) - Moved UP for mobile -->
+        <button id="fab" class="absolute bottom-24 md:bottom-10 right-5 md:right-10 w-14 h-14 bg-brand-red hover:bg-red-700 text-white rounded-full shadow-lg shadow-red-500/30 hover:shadow-xl transform hover:scale-105 active:scale-90 transition-all flex items-center justify-center z-30">
             <i class="ph ph-plus text-2xl font-bold"></i>
         </button>
 
         <!-- Mobile Bottom Nav -->
-        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-16 pb-safe z-40 grid grid-cols-3">
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 h-[calc(4rem+env(safe-area-inset-bottom))] pb-safe z-40 grid grid-cols-3">
             <button data-target="products-section" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-slate-400 active-mobile-nav">
-                <i class="ph ph-camera text-2xl mb-0.5"></i>
-                <span class="text-[10px] font-medium">Products</span>
+                <i class="ph ph-camera text-2xl"></i>
+                <span class="text-[10px] font-bold">Products</span>
             </button>
             <button data-target="categories-section" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-slate-400">
-                <i class="ph ph-squares-four text-2xl mb-0.5"></i>
-                <span class="text-[10px] font-medium">Categories</span>
+                <i class="ph ph-squares-four text-2xl"></i>
+                <span class="text-[10px] font-bold">Categories</span>
             </button>
             <button data-target="orders-section" class="nav-btn-mobile flex flex-col items-center justify-center gap-1 text-slate-400">
-                <i class="ph ph-receipt text-2xl mb-0.5"></i>
-                <span class="text-[10px] font-medium">Orders</span>
+                <i class="ph ph-receipt text-2xl"></i>
+                <span class="text-[10px] font-bold">Orders</span>
             </button>
         </nav>
+    </div>
+
+    <!-- ===== CAMERA OVERLAY (FULL SCREEN) ===== -->
+    <div id="camera-overlay" class="fixed inset-0 z-[80] bg-black hidden flex flex-col">
+        <!-- Top Controls -->
+        <div class="absolute top-0 left-0 right-0 p-4 pt-safe z-20 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
+            <button id="camera-close" class="text-white p-2 rounded-full bg-white/20 backdrop-blur-md">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+            <div class="flex gap-4">
+                <button id="camera-flash" class="text-white p-2 rounded-full bg-white/20 backdrop-blur-md hidden">
+                    <i class="ph ph-lightning text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Video Feed -->
+        <div class="flex-1 relative flex items-center justify-center bg-black overflow-hidden">
+            <video id="main-camera-feed" class="w-full h-full object-cover" autoplay playsinline muted></video>
+            
+            <!-- Zoom Slider (Shown if supported) -->
+            <div id="zoom-container" class="absolute bottom-8 left-10 right-10 hidden z-20">
+                <input type="range" id="zoom-slider" min="1" max="5" step="0.1" value="1" class="w-full">
+            </div>
+        </div>
+
+        <!-- Bottom Controls -->
+        <div class="h-32 bg-black flex items-center justify-center gap-12 pb-safe relative z-20">
+            <button id="camera-capture-btn" class="w-16 h-16 rounded-full border-4 border-white flex items-center justify-center relative after:content-[''] after:w-14 after:h-14 after:bg-white after:rounded-full after:active:scale-90 after:transition-transform"></button>
+        </div>
+        <canvas id="camera-temp-canvas" class="hidden"></canvas>
+    </div>
+
+    <!-- ===== IMAGE EDITOR OVERLAY ===== -->
+    <div id="image-editor" class="fixed inset-0 z-[90] bg-slate-900 hidden flex flex-col">
+        <!-- Editor Header -->
+        <div class="h-14 bg-slate-900 flex items-center justify-between px-4 pt-safe border-b border-slate-800">
+            <button id="editor-cancel" class="text-white font-medium text-sm">Cancel</button>
+            <span class="text-white font-bold">Edit Photo</span>
+            <button id="editor-save" class="text-brand-red font-bold text-sm">Done</button>
+        </div>
+
+        <!-- Editor Canvas Area -->
+        <div class="flex-1 flex items-center justify-center bg-slate-950 overflow-hidden relative p-4">
+            <canvas id="editor-canvas" class="max-w-full max-h-full object-contain shadow-2xl"></canvas>
+        </div>
+
+        <!-- Editor Controls -->
+        <div class="bg-slate-900 pb-safe pt-2 px-6 border-t border-slate-800">
+            <!-- Filter Sliders -->
+            <div class="space-y-4 mb-4">
+                <div class="flex items-center gap-3">
+                    <i class="ph ph-sun text-slate-400"></i>
+                    <input type="range" id="edit-brightness" min="0" max="200" value="100" class="flex-1">
+                </div>
+                <div class="flex items-center gap-3">
+                    <i class="ph ph-contrast text-slate-400"></i>
+                    <input type="range" id="edit-contrast" min="0" max="200" value="100" class="flex-1">
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="flex justify-between items-center py-2">
+                <button id="tool-crop" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center">
+                        <i class="ph ph-crop text-xl"></i>
+                    </div>
+                    <span class="text-[10px]">Crop Sq</span>
+                </button>
+                
+                <button id="tool-blue-bg" class="flex flex-col items-center gap-1 text-slate-400 hover:text-brand-red transition-colors group">
+                    <div class="w-10 h-10 rounded-full bg-blue-600 border-2 border-slate-800 group-hover:border-white flex items-center justify-center">
+                        <i class="ph ph-user text-white text-xl"></i>
+                    </div>
+                    <span class="text-[10px]">Blue BG</span>
+                </button>
+
+                <button id="tool-reset" class="flex flex-col items-center gap-1 text-slate-400 hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center">
+                        <i class="ph ph-arrow-counter-clockwise text-xl"></i>
+                    </div>
+                    <span class="text-[10px]">Reset</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- MODALS -->
     
     <!-- Product Modal -->
-    <div id="product-modal" class="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm hidden flex items-end md:items-center justify-center p-0 md:p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white w-full md:max-w-2xl h-[90vh] md:h-auto md:max-h-[85vh] rounded-t-2xl md:rounded-2xl shadow-2xl flex flex-col transform translate-y-full md:translate-y-0 transition-transform duration-300">
+    <div id="product-modal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden flex items-end md:items-center justify-center p-0 md:p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white w-full md:max-w-2xl h-[92vh] md:h-auto md:max-h-[85vh] rounded-t-3xl md:rounded-3xl shadow-2xl flex flex-col transform translate-y-full md:translate-y-0 transition-transform duration-300">
             <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 id="product-modal-title" class="font-bold text-lg">Product Details</h3>
+                <h3 id="product-modal-title" class="font-bold text-lg text-slate-800">Product Details</h3>
                 <button class="close-modal w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors">
                     <i class="ph ph-x text-lg"></i>
                 </button>
             </div>
             <div class="p-6 overflow-y-auto flex-1">
-                <form id="product-form" class="space-y-4">
+                <form id="product-form" class="space-y-5">
                     <input type="hidden" name="id">
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div class="col-span-1 md:col-span-2">
-                            <label class="text-xs font-bold text-slate-500 uppercase">Product Name</label>
-                            <input type="text" name="name" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none" placeholder="Canon EOS R5" required>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Product Name</label>
+                            <input type="text" name="name" class="w-full mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark focus:outline-none font-medium" placeholder="Canon EOS R5" required>
                         </div>
                         
                         <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase">Price (LKR)</label>
-                            <input type="number" name="price" step="0.01" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none" placeholder="0.00" required>
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Price (LKR)</label>
+                            <input type="number" name="price" step="0.01" class="w-full mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark focus:outline-none font-medium" placeholder="0.00" required>
                         </div>
                         
                         <div>
-                            <label class="text-xs font-bold text-slate-500 uppercase">Condition</label>
-                            <select name="condition" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Condition</label>
+                            <select name="condition" class="w-full mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark focus:outline-none font-medium">
                                 <option value="new">Brand New</option>
                                 <option value="used">Used / Pre-owned</option>
                             </select>
@@ -255,157 +357,108 @@
                     </div>
 
                     <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase">Description</label>
-                        <textarea name="description" rows="3" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none" placeholder="Product features..."></textarea>
-                    </div>
-
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 uppercase">Category</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Category</label>
                         <div class="relative">
-                            <select name="subcategory_id" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-800 focus:outline-none appearance-none" required>
+                            <select name="subcategory_id" class="w-full mt-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark focus:outline-none appearance-none font-medium" required>
                                 <!-- Options populated by JS -->
                             </select>
-                            <i class="ph ph-caret-down absolute right-3 top-1/2 pt-1 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                            <i class="ph ph-caret-down absolute right-4 top-1/2 pt-2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
                         </div>
                     </div>
 
                     <!-- Enhanced Image Picker -->
                     <div class="image-uploader" data-target-input="thumbnail_url">
-                        <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Product Image</label>
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 block">Product Image</label>
                         
-                        <!-- Preview Area -->
-                        <div class="relative w-full h-48 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden group bg-black/5">
-                            <img src="" class="preview-img w-full h-full object-cover hidden">
+                        <div class="relative w-full h-56 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl mb-4 flex items-center justify-center overflow-hidden group">
+                            <img src="" class="preview-img w-full h-full object-contain hidden z-10 bg-white">
                             
-                            <!-- Video Feed for Camera -->
-                            <video class="camera-feed w-full h-full object-cover hidden" autoplay playsinline muted></video>
-                            <canvas class="camera-canvas hidden"></canvas>
-
-                            <div class="placeholder text-slate-400 flex flex-col items-center gap-2">
-                                <i class="ph ph-image text-3xl"></i>
-                                <span class="text-xs">No image selected</span>
+                            <div class="placeholder text-slate-400 flex flex-col items-center gap-3">
+                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                                    <i class="ph ph-image text-2xl"></i>
+                                </div>
+                                <span class="text-xs font-medium">No image selected</span>
                             </div>
                             
-                            <!-- Overlay Loading -->
+                            <!-- Loading Overlay -->
                             <div class="loading-overlay absolute inset-0 bg-white/80 flex items-center justify-center hidden z-20">
                                 <div class="loader border-slate-200 border-t-slate-800"></div>
                             </div>
-                            
-                            <!-- Capture Button (Only shows when camera is active) -->
-                            <button type="button" class="btn-capture absolute bottom-4 left-1/2 -translate-x-1/2 bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-full shadow-lg font-bold hidden z-10 flex items-center gap-2">
-                                <i class="ph ph-aperture text-lg"></i> Capture
-                            </button>
                         </div>
 
-                        <!-- Hidden Input for Form Submission -->
+                        <!-- Hidden Inputs -->
                         <input type="hidden" name="thumbnail_url" class="final-url-input">
 
-                        <!-- Actions -->
-                        <div class="grid grid-cols-3 gap-2">
-                            <!-- Link Option -->
-                            <button type="button" class="btn-link-mode flex flex-col items-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-medium text-slate-600 transition-colors border border-slate-200">
-                                <i class="ph ph-link text-lg"></i> Link
+                        <!-- Actions Grid -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" class="btn-camera-trigger flex items-center justify-center gap-2 p-3 bg-brand-dark hover:bg-black text-white rounded-xl text-sm font-bold shadow-md active:scale-95 transition-all">
+                                <i class="ph ph-camera text-lg"></i> Take Photo
                             </button>
                             
-                            <!-- Upload Option -->
-                            <button type="button" class="btn-upload-mode flex flex-col items-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-medium text-slate-600 transition-colors border border-slate-200 relative overflow-hidden">
+                            <button type="button" class="btn-upload-mode flex items-center justify-center gap-2 p-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold shadow-sm relative active:scale-95 transition-all">
                                 <i class="ph ph-upload-simple text-lg"></i> Upload
                                 <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer file-upload-input z-10">
                             </button>
-                            
-                            <!-- Camera Option (API based) -->
-                            <button type="button" class="btn-camera-mode flex flex-col items-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-xs font-medium text-slate-600 transition-colors border border-slate-200 relative">
-                                <i class="ph ph-camera text-lg"></i> Camera
-                            </button>
-                        </div>
-
-                        <!-- Link Input (Hidden by default) -->
-                        <div class="link-input-container mt-2 hidden animate-fade-in">
-                            <div class="flex gap-2">
-                                <input type="url" class="w-full p-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-800" placeholder="Paste image URL here...">
-                                <button type="button" class="btn-confirm-link px-3 bg-slate-800 text-white rounded-lg text-xs font-bold">OK</button>
-                            </div>
                         </div>
                     </div>
                 </form>
             </div>
-            <div class="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50 rounded-b-2xl">
-                <button type="button" class="close-modal px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
-                <button type="button" onclick="document.getElementById('product-form').dispatchEvent(new Event('submit'))" class="px-5 py-2.5 text-sm font-bold text-white bg-slate-900 hover:bg-black rounded-lg shadow-lg hover:shadow-xl transition-all">Save Product</button>
+            <div class="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50 rounded-b-3xl pb-safe">
+                <button type="button" class="close-modal px-6 py-3 text-sm font-bold text-slate-600 hover:bg-slate-200 rounded-xl transition-colors">Cancel</button>
+                <button type="button" onclick="document.getElementById('product-form').dispatchEvent(new Event('submit'))" class="px-6 py-3 text-sm font-bold text-white bg-brand-red hover:bg-red-700 rounded-xl shadow-lg shadow-red-200 active:scale-95 transition-all">Save Product</button>
             </div>
         </div>
     </div>
 
     <!-- Category Modal -->
-    <div id="category-modal" class="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300">
+    <div id="category-modal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-lg">New Category</h3>
+                <h3 class="font-bold text-lg text-slate-800">New Category</h3>
                 <button class="close-modal text-slate-400 hover:text-slate-600"><i class="ph ph-x text-xl"></i></button>
             </div>
             <form id="category-form" class="p-6 space-y-4">
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Category Name</label>
-                    <input type="text" name="name" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none" required>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Category Name</label>
+                    <input type="text" name="name" class="w-full mt-1.5 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark outline-none font-medium" required>
                 </div>
                 
                 <!-- Category Image Picker -->
                 <div class="image-uploader" data-target-input="image_url">
-                    <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Category Image</label>
+                    <label class="text-xs font-bold text-slate-500 uppercase mb-2 block">Icon / Image</label>
                     
-                    <div class="relative w-full h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl mb-3 flex items-center justify-center overflow-hidden group bg-black/5">
-                        <img src="" class="preview-img w-full h-full object-cover hidden">
-                        
-                        <!-- Video Feed -->
-                        <video class="camera-feed w-full h-full object-cover hidden" autoplay playsinline muted></video>
-                        <canvas class="camera-canvas hidden"></canvas>
-
-                        <div class="placeholder text-slate-400 flex flex-col items-center gap-2">
+                    <div class="relative w-full h-32 bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl mb-3 flex items-center justify-center overflow-hidden group">
+                        <img src="" class="preview-img w-full h-full object-cover hidden z-10 bg-white">
+                        <div class="placeholder text-slate-400 flex flex-col items-center gap-1">
                             <i class="ph ph-image text-2xl"></i>
                             <span class="text-[10px]">No image</span>
                         </div>
-                        
-                        <div class="loading-overlay absolute inset-0 bg-white/80 flex items-center justify-center hidden z-20">
+                         <div class="loading-overlay absolute inset-0 bg-white/80 flex items-center justify-center hidden z-20">
                             <div class="loader w-6 h-6 border-slate-200 border-t-slate-800"></div>
                         </div>
-
-                         <!-- Capture Button -->
-                         <button type="button" class="btn-capture absolute bottom-3 left-1/2 -translate-x-1/2 bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-full shadow-lg text-xs font-bold hidden z-10 flex items-center gap-1">
-                            <i class="ph ph-aperture"></i> Capture
-                        </button>
                     </div>
 
                     <input type="hidden" name="image_url" class="final-url-input">
 
-                    <div class="grid grid-cols-3 gap-2">
-                        <button type="button" class="btn-link-mode flex flex-col items-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-[10px] font-medium text-slate-600 border border-slate-200">
-                            <i class="ph ph-link text-lg"></i> Link
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" class="btn-camera-trigger flex items-center justify-center gap-2 p-2 bg-slate-800 text-white rounded-xl text-xs font-bold">
+                            <i class="ph ph-camera"></i> Camera
                         </button>
-                        <button type="button" class="btn-upload-mode flex flex-col items-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-[10px] font-medium text-slate-600 border border-slate-200 relative">
-                            <i class="ph ph-upload-simple text-lg"></i> Upload
+                        <button type="button" class="btn-upload-mode flex items-center justify-center gap-2 p-2 bg-white border border-slate-200 rounded-xl text-xs font-bold relative">
+                            <i class="ph ph-upload-simple"></i> Upload
                             <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer file-upload-input z-10">
                         </button>
-                        <button type="button" class="btn-camera-mode flex flex-col items-center gap-1 p-2 bg-slate-50 hover:bg-slate-100 rounded-lg text-[10px] font-medium text-slate-600 border border-slate-200 relative">
-                            <i class="ph ph-camera text-lg"></i> Camera
-                        </button>
-                    </div>
-
-                    <div class="link-input-container mt-2 hidden">
-                        <div class="flex gap-2">
-                            <input type="url" class="w-full p-2 text-xs bg-slate-50 border border-slate-200 rounded-lg" placeholder="https://...">
-                            <button type="button" class="btn-confirm-link px-2 bg-slate-800 text-white rounded-lg text-xs">OK</button>
-                        </div>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-all">Create Category</button>
+                <button type="submit" class="w-full py-3.5 bg-brand-red text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 mt-2 transition-all">Create Category</button>
             </form>
         </div>
     </div>
 
     <!-- Subcategory Modal -->
-    <div id="subcategory-modal" class="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300">
+    <div id="subcategory-modal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h3 class="font-bold text-lg">New Subcategory</h3>
                 <button class="close-modal text-slate-400 hover:text-slate-600"><i class="ph ph-x text-xl"></i></button>
@@ -413,36 +466,36 @@
             <form id="subcategory-form" class="p-6 space-y-4">
                 <input type="hidden" name="category_id">
                 <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase">Subcategory Name</label>
-                    <input type="text" name="name" class="w-full mt-1 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-800 outline-none" required>
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Subcategory Name</label>
+                    <input type="text" name="name" class="w-full mt-1.5 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark outline-none font-medium" required>
                 </div>
-                <button type="submit" class="w-full py-3 bg-slate-900 text-white rounded-xl font-bold hover:bg-black transition-all">Add Subcategory</button>
+                <button type="submit" class="w-full py-3.5 bg-brand-dark text-white rounded-xl font-bold hover:bg-black transition-all">Add Subcategory</button>
             </form>
         </div>
     </div>
 
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-modal" class="fixed inset-0 z-[70] bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white w-full max-w-xs rounded-2xl shadow-2xl p-6 text-center">
-            <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="ph ph-trash text-2xl"></i>
+    <!-- Delete Modal -->
+    <div id="delete-modal" class="fixed inset-0 z-[70] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-6">
+        <div class="bg-white w-full max-w-xs rounded-3xl shadow-2xl p-6 text-center transform scale-100 transition-all">
+            <div class="w-14 h-14 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph ph-trash text-3xl"></i>
             </div>
-            <h3 class="font-bold text-lg text-slate-800 mb-2">Delete Item?</h3>
+            <h3 class="font-bold text-xl text-slate-800 mb-2">Delete Item?</h3>
             <p class="text-sm text-slate-500 mb-6">This action cannot be undone.</p>
             <div class="flex gap-3">
-                <button class="close-modal flex-1 py-2.5 bg-slate-100 text-slate-700 font-medium rounded-xl hover:bg-slate-200 transition-colors">Cancel</button>
-                <button id="confirm-delete-btn" class="flex-1 py-2.5 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 transition-all">Delete</button>
+                <button class="close-modal flex-1 py-3 bg-slate-100 text-slate-700 font-bold rounded-xl hover:bg-slate-200 transition-colors">Cancel</button>
+                <button id="confirm-delete-btn" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 shadow-lg shadow-red-200 transition-all">Delete</button>
             </div>
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-20 left-1/2 -translate-x-1/2 md:translate-x-0 md:left-auto md:bottom-8 md:right-8 z-[80] flex flex-col gap-2 w-max max-w-[90vw]"></div>
+    <!-- Toast -->
+    <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 w-max max-w-[90vw]"></div>
 
     <script>
         class AdminApp {
             constructor() {
-                // Initialize Supabase
+                // Initialize Supabase (Use your own keys here if needed)
                 const SUPABASE_URL = 'https://ysigixfsunoovyaoasdh.supabase.co';
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlzaWdpeGZzdW5vb3Z5YW9hc2RoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzNjc5NzIsImV4cCI6MjA4NTk0Mzk3Mn0.U5_aWaUTIlqwyKTlJcSMl-YHjD5KDbA_kUnoEaB3A4Y';
                 this.supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -452,7 +505,14 @@
                 this.categories = [];
                 this.orders = [];
                 this.currentSection = 'products-section';
-                this.activeStreams = []; // Track camera streams to stop them
+                this.activeUploader = null; // Which form triggered the camera
+                this.stream = null;
+                
+                // Editor State
+                this.editorImage = null; // Original Image ImageBitmap/HTMLImageElement
+                this.editorCanvas = document.getElementById('editor-canvas');
+                this.editorCtx = this.editorCanvas.getContext('2d');
+                this.editorSettings = { brightness: 100, contrast: 100, blueBg: false, crop: false };
 
                 this.init();
             }
@@ -470,23 +530,21 @@
             }
 
             setupListeners() {
-                // Login
+                // Auth
                 document.getElementById('login-form').addEventListener('submit', (e) => this.handleLogin(e));
                 
-                // Logout
-                const logoutHandler = () => {
+                const logout = () => {
                     sessionStorage.removeItem('isAdminLoggedIn');
                     window.location.reload();
                 };
-                document.getElementById('logout-btn-desktop').addEventListener('click', logoutHandler);
-                document.getElementById('logout-btn-mobile').addEventListener('click', logoutHandler);
+                document.getElementById('logout-btn-desktop').addEventListener('click', logout);
+                document.getElementById('logout-btn-mobile').addEventListener('click', logout);
 
-                // Navigation
+                // Nav
                 const navHandler = (target) => {
                     this.currentSection = target;
                     this.updateUI();
                 };
-
                 document.querySelectorAll('.nav-btn, .nav-btn-mobile').forEach(btn => {
                     btn.addEventListener('click', () => navHandler(btn.dataset.target));
                 });
@@ -497,7 +555,7 @@
                     if (this.currentSection === 'categories-section') this.openModal('category-modal');
                 });
 
-                // Modals
+                // Modal Close
                 document.querySelectorAll('.close-modal').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         const modal = e.target.closest('[id$="-modal"]');
@@ -510,194 +568,293 @@
                 document.getElementById('category-form').addEventListener('submit', (e) => this.saveCategory(e));
                 document.getElementById('subcategory-form').addEventListener('submit', (e) => this.saveSubcategory(e));
 
-                // Image Uploaders
-                this.setupImageUploaders();
+                // === CAMERA & UPLOAD LISTENERS ===
+                
+                // 1. Trigger Camera from Form
+                document.querySelectorAll('.btn-camera-trigger').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.activeUploader = e.target.closest('.image-uploader');
+                        this.openCamera();
+                    });
+                });
+
+                // 2. Trigger Upload from Form (File Input)
+                document.querySelectorAll('.file-upload-input').forEach(input => {
+                    input.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            this.activeUploader = e.target.closest('.image-uploader');
+                            // Load into editor
+                            await this.loadImageIntoEditor(file);
+                        }
+                    });
+                });
+
+                // 3. Camera Overlay Controls
+                document.getElementById('camera-close').addEventListener('click', () => this.closeCamera());
+                document.getElementById('camera-capture-btn').addEventListener('click', () => this.capturePhoto());
+                
+                // Flash & Zoom
+                document.getElementById('camera-flash').addEventListener('click', () => this.toggleFlash());
+                document.getElementById('zoom-slider').addEventListener('input', (e) => this.setZoom(e.target.value));
+
+                // 4. Editor Controls
+                document.getElementById('editor-cancel').addEventListener('click', () => this.closeEditor());
+                document.getElementById('editor-save').addEventListener('click', () => this.saveEditedImage());
+                
+                // Filter Sliders
+                document.getElementById('edit-brightness').addEventListener('input', () => this.renderEditor());
+                document.getElementById('edit-contrast').addEventListener('input', () => this.renderEditor());
+                
+                // Tools
+                document.getElementById('tool-crop').addEventListener('click', () => {
+                    this.editorSettings.crop = !this.editorSettings.crop;
+                    this.renderEditor();
+                });
+                document.getElementById('tool-blue-bg').addEventListener('click', () => {
+                    this.editorSettings.blueBg = !this.editorSettings.blueBg;
+                    this.renderEditor();
+                });
+                document.getElementById('tool-reset').addEventListener('click', () => {
+                    this.editorSettings = { brightness: 100, contrast: 100, blueBg: false, crop: false };
+                    document.getElementById('edit-brightness').value = 100;
+                    document.getElementById('edit-contrast').value = 100;
+                    this.renderEditor();
+                });
             }
 
-            setupImageUploaders() {
-                document.querySelectorAll('.image-uploader').forEach(container => {
-                    const linkBtn = container.querySelector('.btn-link-mode');
-                    const linkContainer = container.querySelector('.link-input-container');
-                    const linkInput = linkContainer.querySelector('input');
-                    const linkConfirm = linkContainer.querySelector('.btn-confirm-link');
-                    
-                    const fileInputs = container.querySelectorAll('.file-upload-input');
-                    const cameraBtn = container.querySelector('.btn-camera-mode');
-                    const captureBtn = container.querySelector('.btn-capture');
-                    const videoEl = container.querySelector('.camera-feed');
-                    const canvasEl = container.querySelector('.camera-canvas');
-                    
-                    const hiddenInput = container.querySelector('.final-url-input');
-                    const previewImg = container.querySelector('.preview-img');
-                    const placeholder = container.querySelector('.placeholder');
-                    const loader = container.querySelector('.loading-overlay');
-
-                    // 1. Link Mode
-                    linkBtn.addEventListener('click', () => {
-                        linkContainer.classList.toggle('hidden');
-                        if (!linkContainer.classList.contains('hidden')) linkInput.focus();
-                        this.stopCamera(videoEl, captureBtn);
-                    });
-
-                    const setLink = () => {
-                        const url = linkInput.value;
-                        if (url) {
-                            hiddenInput.value = url;
-                            previewImg.src = url;
-                            previewImg.classList.remove('hidden');
-                            placeholder.classList.add('hidden');
-                            linkContainer.classList.add('hidden');
-                            this.stopCamera(videoEl, captureBtn);
-                        }
+            // --- CAMERA LOGIC ---
+            async openCamera() {
+                const overlay = document.getElementById('camera-overlay');
+                const video = document.getElementById('main-camera-feed');
+                
+                overlay.classList.remove('hidden');
+                
+                try {
+                    // Request constraints for environment facing camera + advanced features
+                    const constraints = { 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
+                        } 
                     };
-                    linkConfirm.addEventListener('click', setLink);
 
-                    // 2. File Upload
-                    fileInputs.forEach(input => {
-                        input.addEventListener('change', async (e) => {
-                            this.stopCamera(videoEl, captureBtn);
-                            const file = e.target.files[0];
-                            if (!file) return;
-                            await this.uploadFile(file, loader, hiddenInput, previewImg, placeholder);
-                            input.value = '';
-                        });
-                    });
+                    this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    video.srcObject = this.stream;
 
-                    // 3. Camera Mode (Real getUserMedia)
-                    cameraBtn.addEventListener('click', async () => {
-                        // Reset other views
-                        linkContainer.classList.add('hidden');
-                        previewImg.classList.add('hidden');
-                        placeholder.classList.add('hidden');
+                    // Check Capabilities (Flash/Zoom)
+                    const track = this.stream.getVideoTracks()[0];
+                    const capabilities = track.getCapabilities();
 
-                        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                            this.showToast('Camera API not supported', 'error');
-                            placeholder.classList.remove('hidden');
-                            return;
-                        }
+                    // Flash UI
+                    const flashBtn = document.getElementById('camera-flash');
+                    if (capabilities.torch) flashBtn.classList.remove('hidden');
+                    else flashBtn.classList.add('hidden');
+
+                    // Zoom UI
+                    const zoomContainer = document.getElementById('zoom-container');
+                    const zoomSlider = document.getElementById('zoom-slider');
+                    if (capabilities.zoom) {
+                        zoomContainer.classList.remove('hidden');
+                        zoomSlider.min = capabilities.zoom.min;
+                        zoomSlider.max = capabilities.zoom.max;
+                        zoomSlider.step = capabilities.zoom.step;
+                    } else {
+                        zoomContainer.classList.add('hidden');
+                    }
+
+                } catch (err) {
+                    console.error("Camera Error", err);
+                    this.showToast('Camera access denied or unavailable', 'error');
+                    this.closeCamera();
+                }
+            }
+
+            closeCamera() {
+                const overlay = document.getElementById('camera-overlay');
+                overlay.classList.add('hidden');
+                
+                // Stop stream
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+            }
+
+            async toggleFlash() {
+                if (!this.stream) return;
+                const track = this.stream.getVideoTracks()[0];
+                const settings = track.getSettings();
+                const isTorchOn = settings.torch || false;
+                
+                try {
+                    await track.applyConstraints({ advanced: [{ torch: !isTorchOn }] });
+                    const btn = document.getElementById('camera-flash');
+                    btn.classList.toggle('text-yellow-400', !isTorchOn);
+                    btn.classList.toggle('text-white', isTorchOn);
+                } catch (e) {
+                    console.error('Flash toggle failed', e);
+                }
+            }
+
+            async setZoom(val) {
+                if (!this.stream) return;
+                const track = this.stream.getVideoTracks()[0];
+                try {
+                    await track.applyConstraints({ advanced: [{ zoom: parseFloat(val) }] });
+                } catch (e) { console.error(e); }
+            }
+
+            capturePhoto() {
+                const video = document.getElementById('main-camera-feed');
+                const canvas = document.getElementById('camera-temp-canvas');
+                
+                // High res capture
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+
+                canvas.toBlob((blob) => {
+                    this.closeCamera();
+                    // Open Editor with this blob
+                    this.loadImageIntoEditor(blob);
+                }, 'image/jpeg', 0.95);
+            }
+
+            // --- EDITOR LOGIC ---
+            async loadImageIntoEditor(blobOrFile) {
+                const editor = document.getElementById('image-editor');
+                editor.classList.remove('hidden');
+
+                // Create bitmap
+                this.editorImage = await createImageBitmap(blobOrFile);
+                
+                // Reset settings
+                this.editorSettings = { brightness: 100, contrast: 100, blueBg: false, crop: false };
+                document.getElementById('edit-brightness').value = 100;
+                document.getElementById('edit-contrast').value = 100;
+
+                this.renderEditor();
+            }
+
+            renderEditor() {
+                if (!this.editorImage) return;
+
+                const cvs = this.editorCanvas;
+                const ctx = this.editorCtx;
+                const { width, height } = this.editorImage;
+                
+                // Determine dimensions based on crop
+                let drawWidth = width;
+                let drawHeight = height;
+                let sx = 0, sy = 0;
+
+                if (this.editorSettings.crop) {
+                    // Square crop from center
+                    const size = Math.min(width, height);
+                    sx = (width - size) / 2;
+                    sy = (height - size) / 2;
+                    drawWidth = size;
+                    drawHeight = size;
+                }
+
+                cvs.width = drawWidth;
+                cvs.height = drawHeight;
+
+                // Clear
+                ctx.clearRect(0, 0, cvs.width, cvs.height);
+
+                // 1. Blue Background (Passport style backing)
+                if (this.editorSettings.blueBg) {
+                    ctx.fillStyle = '#0066cc'; // Standard ID blue
+                    ctx.fillRect(0, 0, cvs.width, cvs.height);
+                    
+                    // Note: If image is JPEG (no transparency), this just sits behind it.
+                    // For a true "Passport Mode", we might scale the image down slightly to show blue border?
+                    // Let's scale image down 85% to show blue background frame for passport look if it's opaque
+                    const scale = 0.85;
+                    const w = cvs.width * scale;
+                    const h = cvs.height * scale;
+                    const x = (cvs.width - w) / 2;
+                    const y = (cvs.height - h) / 2;
+
+                    // Draw Image smaller on top
+                    // Apply Filters before drawing
+                    ctx.filter = `brightness(${this.editorSettings.brightness}%) contrast(${this.editorSettings.contrast}%)`;
+                    ctx.drawImage(this.editorImage, sx, sy, drawWidth, drawHeight, x, y, w, h);
+                } else {
+                    // Normal Draw
+                    ctx.filter = `brightness(${this.editorSettings.brightness}%) contrast(${this.editorSettings.contrast}%)`;
+                    ctx.drawImage(this.editorImage, sx, sy, drawWidth, drawHeight, 0, 0, cvs.width, cvs.height);
+                }
+                
+                ctx.filter = 'none'; // reset
+            }
+
+            closeEditor() {
+                document.getElementById('image-editor').classList.add('hidden');
+                this.editorImage = null;
+            }
+
+            async saveEditedImage() {
+                const cvs = this.editorCanvas;
+                const editor = document.getElementById('image-editor');
+                
+                // Show loading on "Done" button
+                const btn = document.getElementById('editor-save');
+                btn.textContent = 'Uploading...';
+                
+                cvs.toBlob(async (blob) => {
+                    const file = new File([blob], `edit_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                    
+                    // Upload to Supabase
+                    if (this.activeUploader) {
+                        const loader = this.activeUploader.querySelector('.loading-overlay');
+                        const hiddenInput = this.activeUploader.querySelector('.final-url-input');
+                        const previewImg = this.activeUploader.querySelector('.preview-img');
+                        const placeholder = this.activeUploader.querySelector('.placeholder');
+
+                        this.closeEditor(); // Close editor immediately
+                        if(loader) loader.classList.remove('hidden');
 
                         try {
-                            const stream = await navigator.mediaDevices.getUserMedia({ 
-                                video: { facingMode: 'environment' } 
-                            });
+                            const fileName = `${Date.now()}_edited.jpg`;
+                            const { data, error } = await this.supabase.storage
+                                .from('images')
+                                .upload(fileName, file);
+
+                            if (error) throw error;
+
+                            const { data: { publicUrl } } = this.supabase.storage
+                                .from('images')
+                                .getPublicUrl(fileName);
+
+                            hiddenInput.value = publicUrl;
+                            previewImg.src = publicUrl;
+                            previewImg.classList.remove('hidden');
+                            if(placeholder) placeholder.classList.add('hidden');
                             
-                            videoEl.srcObject = stream;
-                            videoEl.classList.remove('hidden');
-                            captureBtn.classList.remove('hidden');
-                            this.activeStreams.push(stream);
+                            this.showToast('Image Saved', 'success');
 
                         } catch (err) {
                             console.error(err);
-                            this.showToast('No webcam detected', 'error');
-                            placeholder.classList.remove('hidden');
+                            this.showToast('Upload Failed', 'error');
+                        } finally {
+                             if(loader) loader.classList.add('hidden');
+                             btn.textContent = 'Done';
                         }
-                    });
-
-                    // 4. Capture Photo
-                    captureBtn.addEventListener('click', async () => {
-                        // Draw video frame to canvas
-                        canvasEl.width = videoEl.videoWidth;
-                        canvasEl.height = videoEl.videoHeight;
-                        const ctx = canvasEl.getContext('2d');
-                        ctx.drawImage(videoEl, 0, 0, canvasEl.width, canvasEl.height);
-                        
-                        // Convert to blob
-                        canvasEl.toBlob(async (blob) => {
-                            if (blob) {
-                                // Create a file object from blob
-                                const file = new File([blob], `capture_${Date.now()}.jpg`, { type: 'image/jpeg' });
-                                await this.uploadFile(file, loader, hiddenInput, previewImg, placeholder);
-                                this.stopCamera(videoEl, captureBtn);
-                            }
-                        }, 'image/jpeg', 0.8);
-                    });
-                });
+                    }
+                }, 'image/jpeg', 0.9);
             }
 
-            stopCamera(videoEl, captureBtn) {
-                if (videoEl && videoEl.srcObject) {
-                    const tracks = videoEl.srcObject.getTracks();
-                    tracks.forEach(track => track.stop());
-                    videoEl.srcObject = null;
-                }
-                if (videoEl) videoEl.classList.add('hidden');
-                if (captureBtn) captureBtn.classList.add('hidden');
-            }
+            // --- STANDARD APP LOGIC ---
 
-            stopAllCameras() {
-                this.activeStreams.forEach(stream => {
-                    stream.getTracks().forEach(track => track.stop());
-                });
-                this.activeStreams = [];
-                document.querySelectorAll('.camera-feed').forEach(v => v.classList.add('hidden'));
-                document.querySelectorAll('.btn-capture').forEach(b => b.classList.add('hidden'));
-            }
-
-            async uploadFile(file, loader, hiddenInput, previewImg, placeholder) {
-                loader.classList.remove('hidden');
-                try {
-                    const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-                    const { data, error } = await this.supabase.storage
-                        .from('images')
-                        .upload(fileName, file);
-
-                    if (error) throw error;
-
-                    const { data: { publicUrl } } = this.supabase.storage
-                        .from('images')
-                        .getPublicUrl(fileName);
-
-                    hiddenInput.value = publicUrl;
-                    previewImg.src = publicUrl;
-                    previewImg.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                    this.showToast('Image Uploaded', 'success');
-                } catch (err) {
-                    console.error(err);
-                    this.showToast('Upload Failed: ' + err.message, 'error');
-                    placeholder.classList.remove('hidden');
-                } finally {
-                    loader.classList.add('hidden');
-                }
-            }
-
-            resetImageUploader(formId, imageUrl) {
-                const container = document.querySelector(`#${formId} .image-uploader`);
-                const previewImg = container.querySelector('.preview-img');
-                const placeholder = container.querySelector('.placeholder');
-                const hiddenInput = container.querySelector('.final-url-input');
-                const linkInput = container.querySelector('.link-input-container input');
-                
-                // Force stop any camera running in this form
-                const videoEl = container.querySelector('.camera-feed');
-                const captureBtn = container.querySelector('.btn-capture');
-                this.stopCamera(videoEl, captureBtn);
-
-                if (imageUrl) {
-                    hiddenInput.value = imageUrl;
-                    previewImg.src = imageUrl;
-                    previewImg.classList.remove('hidden');
-                    placeholder.classList.add('hidden');
-                } else {
-                    hiddenInput.value = '';
-                    previewImg.src = '';
-                    previewImg.classList.add('hidden');
-                    placeholder.classList.remove('hidden');
-                }
-                linkInput.value = '';
-                container.querySelector('.link-input-container').classList.add('hidden');
-            }
-
-            // --- AUTH ---
             async handleLogin(e) {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                const btn = e.target.querySelector('button');
-                
-                // Loading state
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<div class="loader w-5 h-5 border-white border-t-transparent"></div>';
                 
                 const { data, error } = await this.supabase
                     .from('admins')
@@ -712,23 +869,18 @@
                 } else {
                     this.showToast('Invalid credentials', 'error');
                 }
-                btn.innerHTML = originalText;
             }
 
             showDashboard() {
                 const loginView = document.getElementById('login-view');
                 const mainContent = document.getElementById('main-content');
-                
                 loginView.classList.add('opacity-0', 'pointer-events-none');
                 setTimeout(() => loginView.classList.add('hidden'), 300);
-
                 mainContent.classList.remove('hidden');
-                // Trigger reflow
                 void mainContent.offsetWidth; 
                 mainContent.classList.remove('opacity-0', 'pointer-events-none');
             }
 
-            // --- DATA ---
             async fetchData() {
                 try {
                     const [productsRes, categoriesRes, ordersRes] = await Promise.all([
@@ -745,14 +897,12 @@
 
                     this.renderAll();
                     this.showToast('Inventory Synced', 'success');
-
                 } catch (err) {
                     console.error(err);
                     this.showToast('Sync Failed', 'error');
                 }
             }
 
-            // --- RENDERING ---
             renderAll() {
                 this.renderProducts();
                 this.renderCategories();
@@ -763,31 +913,27 @@
             renderProducts() {
                 const container = document.getElementById('product-list');
                 if (this.products.length === 0) {
-                    container.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">No products found. Tap + to add one.</div>`;
+                    container.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10">No products found.</div>`;
                     return;
                 }
-
                 container.innerHTML = this.products.map(p => `
-                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative group">
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 relative group hover:border-brand-red/20 transition-all">
                         <div class="flex gap-4">
                             <div class="w-20 h-20 rounded-xl bg-slate-50 flex-shrink-0 overflow-hidden border border-slate-100">
-                                <img src="${p.thumbnail_url || 'https://placehold.co/100x100?text=No+Img'}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100?text=Error'">
+                                <img src="${p.thumbnail_url || 'https://placehold.co/100x100?text=No+Img'}" class="w-full h-full object-cover">
                             </div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="font-bold text-slate-800 truncate pr-4">${p.name}</h3>
-                                    <span class="text-[10px] px-2 py-0.5 rounded-full ${p.condition === 'new' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'} font-bold uppercase tracking-wide">${p.condition}</span>
-                                </div>
-                                <p class="text-xs text-slate-500 mt-0.5 truncate">${p.category_name} &bull; ${p.subcategory_name}</p>
-                                <div class="mt-2 flex items-baseline gap-1">
-                                    <span class="text-xs text-slate-400">LKR</span>
-                                    <span class="text-lg font-bold text-slate-900">${parseFloat(p.price).toLocaleString()}</span>
+                                <h3 class="font-bold text-slate-800 truncate">${p.name}</h3>
+                                <p class="text-xs text-slate-500 mb-1">${p.category_name || ''}</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-bold text-slate-900">LKR ${parseFloat(p.price).toLocaleString()}</span>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full ${p.condition === 'new' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'} font-bold uppercase">${p.condition}</span>
                                 </div>
                             </div>
                         </div>
                         <div class="mt-4 pt-3 border-t border-slate-50 flex justify-end gap-2">
-                            <button onclick="app.editProduct(${p.id})" class="text-sm px-3 py-1.5 rounded-lg bg-slate-50 text-slate-600 font-medium hover:bg-slate-100 transition-colors">Edit</button>
-                            <button onclick="app.confirmDelete('product', ${p.id})" class="text-sm px-3 py-1.5 rounded-lg bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors">Delete</button>
+                             <button onclick="app.editProduct(${p.id})" class="text-xs font-bold text-slate-500 hover:text-brand-red px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">EDIT</button>
+                             <button onclick="app.confirmDelete('product', ${p.id})" class="text-xs font-bold text-red-500 hover:text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-50 transition-colors">DELETE</button>
                         </div>
                     </div>
                 `).join('');
@@ -796,27 +942,19 @@
             renderCategories() {
                 const container = document.getElementById('categories-list');
                 container.innerHTML = this.categories.map(c => `
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
-                                    ${c.image_url ? `<img src="${c.image_url}" class="w-full h-full rounded-full object-cover">` : '<i class="ph ph-tag text-xl"></i>'}
-                                </div>
-                                <h3 class="font-bold text-slate-800">${c.name}</h3>
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex justify-between items-start">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
+                                ${c.image_url ? `<img src="${c.image_url}" class="w-full h-full object-cover">` : '<i class="ph ph-tag text-xl text-slate-400"></i>'}
                             </div>
-                            <button onclick="app.openSubcategoryModal(${c.id})" class="text-xs font-bold text-brand-red hover:bg-red-50 px-2 py-1 rounded">
-                                + SUB
-                            </button>
+                            <div>
+                                <h3 class="font-bold text-slate-800">${c.name}</h3>
+                                <p class="text-xs text-slate-500">${c.subcategories?.length || 0} Subcategories</p>
+                            </div>
                         </div>
-                        <div class="space-y-1 pl-13">
-                            ${c.subcategories && c.subcategories.length > 0 
-                                ? c.subcategories.map(s => `
-                                    <div class="flex items-center gap-2 text-sm text-slate-500 py-1 border-l-2 border-slate-100 pl-3">
-                                        <span>${s.name}</span>
-                                    </div>
-                                `).join('') 
-                                : '<span class="text-xs text-slate-400 italic pl-3">No subcategories</span>'}
-                        </div>
+                        <button onclick="app.openSubcategoryModal(${c.id})" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
+                            <i class="ph ph-plus-bold"></i>
+                        </button>
                     </div>
                 `).join('');
             }
@@ -824,24 +962,19 @@
             renderOrders() {
                 const container = document.getElementById('order-list');
                 container.innerHTML = this.orders.map(o => `
-                    <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex flex-col gap-3">
-                        <div class="flex justify-between items-center pb-2 border-b border-slate-50">
+                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start mb-2">
                             <div>
-                                <p class="font-bold text-slate-800">${o.customer_name}</p>
+                                <h4 class="font-bold text-slate-800">${o.customer_name}</h4>
                                 <p class="text-xs text-slate-500">${new Date(o.created_at).toLocaleDateString()}</p>
                             </div>
-                            <div class="text-right">
-                                <p class="font-bold text-slate-900">LKR ${parseFloat(o.total_price).toLocaleString()}</p>
-                                <span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium uppercase">${o.payment_method}</span>
-                            </div>
+                            <span class="px-2 py-1 bg-slate-100 rounded-lg text-xs font-bold text-slate-600 uppercase">${o.status || 'Pending'}</span>
                         </div>
-                        <div class="flex justify-between items-center text-sm">
-                            <a href="tel:${o.customer_phone}" class="flex items-center gap-2 text-slate-600 hover:text-blue-600">
-                                <i class="ph ph-phone"></i> ${o.customer_phone}
+                        <div class="flex justify-between items-end mt-4">
+                            <a href="tel:${o.customer_phone}" class="flex items-center gap-2 text-sm text-slate-600 font-medium hover:text-brand-red">
+                                <i class="ph ph-phone-call text-lg"></i> Call
                             </a>
-                            <button onclick="alert('Items: ' + ${o.order_items.length})" class="text-xs font-bold text-slate-400 hover:text-slate-600">
-                                View Items <i class="ph ph-caret-right"></i>
-                            </button>
+                            <p class="text-lg font-bold text-brand-dark">LKR ${parseFloat(o.total_price).toLocaleString()}</p>
                         </div>
                     </div>
                 `).join('');
@@ -856,38 +989,34 @@
                 `).join('');
             }
 
-            // --- ACTIONS ---
             updateUI() {
-                // Update Sections
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
                 document.getElementById(this.currentSection).classList.remove('hidden');
-
-                // Update Desktop Nav
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    const isActive = btn.dataset.target === this.currentSection;
-                    btn.classList.toggle('bg-slate-50', isActive);
-                    btn.classList.toggle('text-brand-red', isActive);
-                    btn.classList.toggle('text-slate-600', !isActive);
-                });
-
-                // Update Mobile Nav
-                document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
-                    const isActive = btn.dataset.target === this.currentSection;
-                    btn.classList.toggle('text-brand-red', isActive);
-                    btn.classList.toggle('text-slate-400', !isActive);
-                });
                 
-                // Update Title
+                // Titles
                 const titles = {'products-section': 'Inventory', 'categories-section': 'Categories', 'orders-section': 'Sales Orders'};
                 document.getElementById('page-title').textContent = titles[this.currentSection];
 
-                // FAB visibility
+                // Desktop Nav Active State
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    const active = btn.dataset.target === this.currentSection;
+                    btn.className = `nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold rounded-2xl transition-all ${active ? 'bg-slate-50 text-brand-red' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-red'}`;
+                });
+
+                // Mobile Nav Active State
+                document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
+                    const active = btn.dataset.target === this.currentSection;
+                    btn.classList.toggle('text-brand-red', active);
+                    btn.classList.toggle('text-slate-400', !active);
+                });
+
+                // FAB
                 const fab = document.getElementById('fab');
-                if (this.currentSection === 'orders-section') fab.classList.add('scale-0');
+                if(this.currentSection === 'orders-section') fab.classList.add('scale-0');
                 else fab.classList.remove('scale-0');
             }
 
-            // --- PRODUCT LOGIC ---
+            // --- PRODUCT ACTIONS ---
             editProduct(id) {
                 const p = this.products.find(x => x.id === id);
                 if (!p) return;
@@ -897,11 +1026,23 @@
                 form.name.value = p.name;
                 form.price.value = p.price;
                 form.condition.value = p.condition;
-                form.description.value = p.description || '';
                 form.subcategory_id.value = p.subcategory_id;
                 
-                // Use helper to reset image UI
-                this.resetImageUploader('product-form', p.thumbnail_url);
+                // Reset Image UI
+                const container = form.querySelector('.image-uploader');
+                const prev = container.querySelector('.preview-img');
+                const place = container.querySelector('.placeholder');
+                const inp = container.querySelector('.final-url-input');
+                
+                inp.value = p.thumbnail_url || '';
+                if(p.thumbnail_url) {
+                    prev.src = p.thumbnail_url;
+                    prev.classList.remove('hidden');
+                    place.classList.add('hidden');
+                } else {
+                    prev.classList.add('hidden');
+                    place.classList.remove('hidden');
+                }
 
                 document.getElementById('product-modal-title').textContent = 'Edit Product';
                 this.openModal('product-modal');
@@ -912,15 +1053,11 @@
                 const form = e.target;
                 const formData = new FormData(form);
                 const id = formData.get('id');
-                const btn = form.closest('.fixed').querySelector('button[onclick*="submit"]'); // Find save button
-                const originalText = btn.textContent;
-                btn.textContent = 'Saving...';
 
                 const data = {
                     name: formData.get('name'),
                     price: parseFloat(formData.get('price')),
                     condition: formData.get('condition'),
-                    description: formData.get('description'),
                     subcategory_id: parseInt(formData.get('subcategory_id'))
                 };
 
@@ -934,14 +1071,14 @@
                 if (res.error) {
                     this.showToast(res.error.message, 'error');
                 } else {
-                    // Handle Image
+                    // Update Image if changed
                     const newId = id || res.data.id;
                     const imgUrl = formData.get('thumbnail_url');
                     
-                    // Cleanup old thumbnails
-                    await this.supabase.from('product_images').delete().match({ product_id: newId, is_thumbnail: true });
-                    
                     if (imgUrl) {
+                        // Clear old main thumbnails
+                        await this.supabase.from('product_images').delete().match({ product_id: newId, is_thumbnail: true });
+                        // Add new
                         await this.supabase.from('product_images').insert({
                             product_id: newId,
                             image_url: imgUrl,
@@ -956,10 +1093,11 @@
                     // Reset
                     form.reset();
                     form.id.value = '';
-                    this.resetImageUploader('product-form', '');
-                    document.getElementById('product-modal-title').textContent = 'Add Product';
+                    const container = form.querySelector('.image-uploader');
+                    container.querySelector('.preview-img').classList.add('hidden');
+                    container.querySelector('.placeholder').classList.remove('hidden');
+                    container.querySelector('.final-url-input').value = '';
                 }
-                btn.textContent = originalText;
             }
 
             async saveCategory(e) {
@@ -971,20 +1109,22 @@
                     name: formData.get('name'),
                     image_url: formData.get('image_url')
                 });
-                
+
                 if (error) this.showToast(error.message, 'error');
                 else {
                     this.showToast('Category Created', 'success');
                     this.closeModal('category-modal');
-                    form.reset();
-                    this.resetImageUploader('category-form', '');
                     this.fetchData();
+                    form.reset();
+                    // Reset image UI...
+                    const container = form.querySelector('.image-uploader');
+                    container.querySelector('.preview-img').classList.add('hidden');
+                    container.querySelector('.placeholder').classList.remove('hidden');
                 }
             }
 
             openSubcategoryModal(catId) {
-                const form = document.getElementById('subcategory-form');
-                form.category_id.value = catId;
+                document.getElementById('subcategory-form').category_id.value = catId;
                 this.openModal('subcategory-modal');
             }
 
@@ -1000,8 +1140,8 @@
                 else {
                     this.showToast('Subcategory Added', 'success');
                     this.closeModal('subcategory-modal');
-                    form.reset();
                     this.fetchData();
+                    form.reset();
                 }
             }
 
@@ -1009,75 +1149,49 @@
                 this.openModal('delete-modal');
                 const btn = document.getElementById('confirm-delete-btn');
                 btn.onclick = async () => {
-                    btn.textContent = 'Deleting...';
-                    let table = type === 'product' ? 'products' : 'categories'; // simple logic
+                    const table = type === 'product' ? 'products' : 'categories';
                     const { error } = await this.supabase.from(table).delete().eq('id', id);
-                    
-                    if (error) this.showToast('Delete failed', 'error');
+                    if (error) this.showToast('Error deleting item', 'error');
                     else {
-                        this.showToast('Item Deleted', 'success');
+                        this.showToast('Item deleted', 'success');
                         this.fetchData();
                     }
                     this.closeModal('delete-modal');
-                    btn.textContent = 'Delete';
                 };
             }
 
-            // --- UI HELPERS ---
             openModal(id) {
                 const modal = document.getElementById(id);
-                // Reset form on open if it's an "Add" action
-                if (id === 'product-modal' && !document.querySelector('#product-form [name="id"]').value) {
-                    this.resetImageUploader('product-form', '');
-                }
-                if (id === 'category-modal') {
-                    // Check if it's a fresh open (optional, simpler to just reset if no ID logic implemented for categories yet)
-                    // this.resetImageUploader('category-form', '');
-                }
-
                 modal.classList.remove('hidden');
-                // reflow
                 void modal.offsetWidth;
                 modal.classList.remove('opacity-0');
+                modal.querySelector('div').classList.remove('translate-y-full', 'scale-95');
                 
-                const content = modal.querySelector('div');
-                content.classList.remove('translate-y-full', 'scale-95');
+                // Clear form if product modal opened for "Add" (no ID)
+                if (id === 'product-modal' && !document.querySelector('#product-form [name="id"]').value) {
+                    document.getElementById('product-modal-title').textContent = 'Add Product';
+                }
             }
 
             closeModal(id) {
                 const modal = document.getElementById(id);
                 modal.classList.add('opacity-0');
-                const content = modal.querySelector('div');
-                content.classList.add('translate-y-full', 'scale-95');
-                
-                // Cleanup cameras if any open in this modal
-                this.stopAllCameras();
-
-                setTimeout(() => {
-                    modal.classList.add('hidden');
-                }, 300);
+                modal.querySelector('div').classList.add('translate-y-full', 'scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 300);
             }
 
             showToast(msg, type = 'neutral') {
                 const container = document.getElementById('toast-container');
                 const el = document.createElement('div');
+                const colors = type === 'success' ? 'bg-slate-900 text-white' : type === 'error' ? 'bg-red-600 text-white' : 'bg-white text-slate-900 border border-slate-200';
                 
-                let icon = type === 'success' ? 'check-circle' : type === 'error' ? 'warning-circle' : 'info';
-                let colors = type === 'success' ? 'bg-slate-900 text-white' : type === 'error' ? 'bg-red-500 text-white' : 'bg-white text-slate-800 border border-slate-200';
-
-                el.className = `${colors} px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium transform translate-y-10 opacity-0 transition-all duration-300`;
-                el.innerHTML = `<i class="ph ph-${icon} text-lg"></i> ${msg}`;
+                el.className = `${colors} px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 font-bold transform -translate-y-10 opacity-0 transition-all duration-300`;
+                el.innerHTML = `<i class="ph ph-${type === 'success' ? 'check-circle' : 'warning-circle'} text-xl"></i> ${msg}`;
                 
                 container.appendChild(el);
-                
-                // Animate in
-                requestAnimationFrame(() => {
-                    el.classList.remove('translate-y-10', 'opacity-0');
-                });
-
-                // Remove
+                requestAnimationFrame(() => el.classList.remove('-translate-y-10', 'opacity-0'));
                 setTimeout(() => {
-                    el.classList.add('opacity-0', 'translate-y-4');
+                    el.classList.add('-translate-y-10', 'opacity-0');
                     setTimeout(() => el.remove(), 300);
                 }, 3000);
             }
