@@ -12,8 +12,12 @@
     <meta name="theme-color" content="#CC0000">
     <meta name="robots" content="noindex, nofollow">
 
-    <!-- Embedded Manifest for PWA (Data URI) -->
-    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Canon%20Trade%20Center%22%2C%22short_name%22%3A%22Canon%20Admin%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23CC0000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2FKcv18dvK%2FCanon-Trade-Center-Logo-copy.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
+    <!-- App Icons (Updated) -->
+    <link rel="apple-touch-icon" href="https://i.ibb.co/KzKwbFBS/favicon-96x96.png">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/KzKwbFBS/favicon-96x96.png">
+
+    <!-- Embedded Manifest for PWA (Data URI with New Icon) -->
+    <link rel="manifest" href='data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Canon%20Trade%20Center%22%2C%22short_name%22%3A%22Canon%20Admin%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%23CC0000%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2FKzKwbFBS%2Ffavicon-96x96.png%22%2C%22sizes%22%3A%2296x96%22%2C%22type%22%3A%22image%2Fpng%22%7D%5D%7D'>
     
     <title>Canon Admin</title>
 
@@ -73,6 +77,24 @@
             background: #e2e8f0;
             border-radius: 2px;
         }
+        
+        /* Transition for accordion */
+        .accordion-content {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        .accordion-content.open {
+            max-height: 500px; /* Arbitrary large height */
+            opacity: 1;
+        }
+        .rotate-icon {
+            transition: transform 0.3s ease;
+        }
+        .rotate-icon.open {
+            transform: rotate(180deg);
+        }
     </style>
     
     <script>
@@ -85,14 +107,6 @@
                             dark: '#1a1a1a',
                             gray: '#f5f5f5'
                         }
-                    },
-                    animation: {
-                        'fade-in': 'fadeIn 0.3s ease-out',
-                        'slide-up': 'slideUp 0.3s ease-out'
-                    },
-                    keyframes: {
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } },
-                        slideUp: { '0%': { transform: 'translateY(100%)' }, '100%': { transform: 'translateY(0)' } }
                     }
                 }
             }
@@ -197,7 +211,8 @@
                 <div class="flex justify-between items-center md:hidden pb-2">
                     <h2 class="text-xl font-bold text-slate-800">Categories</h2>
                 </div>
-                <div id="categories-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Categories List -->
+                <div id="categories-list" class="space-y-4 max-w-4xl">
                     <!-- Categories injected here -->
                 </div>
             </section>
@@ -214,7 +229,7 @@
 
         </main>
 
-        <!-- Floating Action Button (FAB) - Moved UP for mobile -->
+        <!-- Floating Action Button (FAB) -->
         <button id="fab" class="absolute bottom-24 md:bottom-10 right-5 md:right-10 w-14 h-14 bg-brand-red hover:bg-red-700 text-white rounded-full shadow-lg shadow-red-500/30 hover:shadow-xl transform hover:scale-105 active:scale-90 transition-all flex items-center justify-center z-30">
             <i class="ph ph-plus text-2xl font-bold"></i>
         </button>
@@ -414,10 +429,11 @@
     <div id="category-modal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-lg text-slate-800">New Category</h3>
+                <h3 id="category-modal-title" class="font-bold text-lg text-slate-800">New Category</h3>
                 <button class="close-modal text-slate-400 hover:text-slate-600"><i class="ph ph-x text-xl"></i></button>
             </div>
             <form id="category-form" class="p-6 space-y-4">
+                <input type="hidden" name="id"> <!-- ID for editing -->
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Category Name</label>
                     <input type="text" name="name" class="w-full mt-1.5 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark outline-none font-medium" required>
@@ -451,7 +467,7 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 bg-brand-red text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 mt-2 transition-all">Create Category</button>
+                <button type="submit" id="category-submit-btn" class="w-full py-3.5 bg-brand-red text-white rounded-xl font-bold hover:bg-red-700 shadow-lg shadow-red-200 mt-2 transition-all">Save Category</button>
             </form>
         </div>
     </div>
@@ -460,16 +476,17 @@
     <div id="subcategory-modal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
         <div class="bg-white w-full max-w-sm rounded-3xl shadow-2xl transform scale-95 transition-transform duration-300">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 class="font-bold text-lg">New Subcategory</h3>
+                <h3 id="subcategory-modal-title" class="font-bold text-lg">New Subcategory</h3>
                 <button class="close-modal text-slate-400 hover:text-slate-600"><i class="ph ph-x text-xl"></i></button>
             </div>
             <form id="subcategory-form" class="p-6 space-y-4">
                 <input type="hidden" name="category_id">
+                <input type="hidden" name="id"> <!-- For editing -->
                 <div>
                     <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Subcategory Name</label>
                     <input type="text" name="name" class="w-full mt-1.5 p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-dark outline-none font-medium" required>
                 </div>
-                <button type="submit" class="w-full py-3.5 bg-brand-dark text-white rounded-xl font-bold hover:bg-black transition-all">Add Subcategory</button>
+                <button type="submit" class="w-full py-3.5 bg-brand-dark text-white rounded-xl font-bold hover:bg-black transition-all">Save</button>
             </form>
         </div>
     </div>
@@ -505,11 +522,11 @@
                 this.categories = [];
                 this.orders = [];
                 this.currentSection = 'products-section';
-                this.activeUploader = null; // Which form triggered the camera
+                this.activeUploader = null; 
                 this.stream = null;
                 
                 // Editor State
-                this.editorImage = null; // Original Image ImageBitmap/HTMLImageElement
+                this.editorImage = null; 
                 this.editorCanvas = document.getElementById('editor-canvas');
                 this.editorCtx = this.editorCanvas.getContext('2d');
                 this.editorSettings = { brightness: 100, contrast: 100, blueBg: false, crop: false };
@@ -569,8 +586,6 @@
                 document.getElementById('subcategory-form').addEventListener('submit', (e) => this.saveSubcategory(e));
 
                 // === CAMERA & UPLOAD LISTENERS ===
-                
-                // 1. Trigger Camera from Form
                 document.querySelectorAll('.btn-camera-trigger').forEach(btn => {
                     btn.addEventListener('click', (e) => {
                         this.activeUploader = e.target.closest('.image-uploader');
@@ -578,35 +593,28 @@
                     });
                 });
 
-                // 2. Trigger Upload from Form (File Input)
                 document.querySelectorAll('.file-upload-input').forEach(input => {
                     input.addEventListener('change', async (e) => {
                         const file = e.target.files[0];
                         if (file) {
                             this.activeUploader = e.target.closest('.image-uploader');
-                            // Load into editor
                             await this.loadImageIntoEditor(file);
                         }
                     });
                 });
 
-                // 3. Camera Overlay Controls
                 document.getElementById('camera-close').addEventListener('click', () => this.closeCamera());
                 document.getElementById('camera-capture-btn').addEventListener('click', () => this.capturePhoto());
                 
-                // Flash & Zoom
                 document.getElementById('camera-flash').addEventListener('click', () => this.toggleFlash());
                 document.getElementById('zoom-slider').addEventListener('input', (e) => this.setZoom(e.target.value));
 
-                // 4. Editor Controls
                 document.getElementById('editor-cancel').addEventListener('click', () => this.closeEditor());
                 document.getElementById('editor-save').addEventListener('click', () => this.saveEditedImage());
                 
-                // Filter Sliders
                 document.getElementById('edit-brightness').addEventListener('input', () => this.renderEditor());
                 document.getElementById('edit-contrast').addEventListener('input', () => this.renderEditor());
                 
-                // Tools
                 document.getElementById('tool-crop').addEventListener('click', () => {
                     this.editorSettings.crop = !this.editorSettings.crop;
                     this.renderEditor();
@@ -623,36 +631,213 @@
                 });
             }
 
-            // --- CAMERA LOGIC ---
+            // --- CATEGORY & SUB LOGIC ---
+            renderCategories() {
+                const container = document.getElementById('categories-list');
+                container.innerHTML = this.categories.map(c => `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <!-- Header (Clickable) -->
+                        <div class="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors" onclick="app.toggleCategory(${c.id})">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                                    ${c.image_url ? `<img src="${c.image_url}" class="w-full h-full object-cover">` : '<i class="ph ph-tag text-xl text-slate-400"></i>'}
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-slate-800">${c.name}</h3>
+                                    <p class="text-xs text-slate-500">${c.subcategories?.length || 0} Subcategories</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="event.stopPropagation(); app.editCategory(${c.id})" class="p-2 text-slate-400 hover:text-brand-dark rounded-full hover:bg-white transition-all">
+                                    <i class="ph ph-pencil-simple text-lg"></i>
+                                </button>
+                                <i id="icon-${c.id}" class="ph ph-caret-down text-slate-400 text-lg rotate-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- Expanded Content -->
+                        <div id="cat-content-${c.id}" class="accordion-content bg-slate-50 border-t border-slate-100">
+                            <div class="p-4 space-y-2">
+                                <div class="flex justify-between items-center mb-2 px-1">
+                                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Subcategories</span>
+                                    <button onclick="app.openSubcategoryModal(${c.id})" class="text-xs font-bold text-brand-red hover:text-red-700 flex items-center gap-1">
+                                        <i class="ph ph-plus"></i> Add New
+                                    </button>
+                                </div>
+                                
+                                ${c.subcategories && c.subcategories.length > 0 ? c.subcategories.map(s => `
+                                    <div class="flex items-center justify-between p-3 bg-white rounded-xl border border-slate-200">
+                                        <span class="text-sm font-medium text-slate-700">${s.name}</span>
+                                        <div class="flex items-center gap-1">
+                                            <button onclick="app.editSubcategory(${s.id}, '${s.name}', ${c.id})" class="p-1.5 text-slate-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                                                <i class="ph ph-pencil-simple"></i>
+                                            </button>
+                                            <button onclick="app.confirmDelete('subcategory', ${s.id})" class="p-1.5 text-slate-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors">
+                                                <i class="ph ph-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                `).join('') : `
+                                    <div class="text-center py-4 text-slate-400 text-sm italic">No subcategories yet</div>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            toggleCategory(id) {
+                const content = document.getElementById(`cat-content-${id}`);
+                const icon = document.getElementById(`icon-${id}`);
+                
+                const isOpen = content.classList.contains('open');
+                
+                // Close all others (optional accordion behavior)
+                document.querySelectorAll('.accordion-content').forEach(el => el.classList.remove('open'));
+                document.querySelectorAll('.rotate-icon').forEach(el => el.classList.remove('open'));
+
+                if (!isOpen) {
+                    content.classList.add('open');
+                    icon.classList.add('open');
+                }
+            }
+
+            editCategory(id) {
+                const c = this.categories.find(x => x.id === id);
+                if(!c) return;
+
+                const form = document.getElementById('category-form');
+                form.id.value = c.id;
+                form.name.value = c.name;
+                
+                // Image handling
+                const container = form.querySelector('.image-uploader');
+                const inp = container.querySelector('.final-url-input');
+                const prev = container.querySelector('.preview-img');
+                const place = container.querySelector('.placeholder');
+
+                inp.value = c.image_url || '';
+                if(c.image_url) {
+                    prev.src = c.image_url;
+                    prev.classList.remove('hidden');
+                    place.classList.add('hidden');
+                } else {
+                    prev.classList.add('hidden');
+                    place.classList.remove('hidden');
+                }
+
+                document.getElementById('category-modal-title').textContent = 'Edit Category';
+                document.getElementById('category-submit-btn').textContent = 'Update Category';
+                this.openModal('category-modal');
+            }
+
+            async saveCategory(e) {
+                e.preventDefault();
+                const form = e.target;
+                const formData = new FormData(form);
+                const id = formData.get('id');
+
+                const data = {
+                    name: formData.get('name'),
+                    image_url: formData.get('image_url')
+                };
+
+                let res;
+                if(id) {
+                    res = await this.supabase.from('categories').update(data).eq('id', id);
+                } else {
+                    res = await this.supabase.from('categories').insert(data);
+                }
+
+                if (res.error) this.showToast(res.error.message, 'error');
+                else {
+                    this.showToast(id ? 'Category Updated' : 'Category Created', 'success');
+                    this.closeModal('category-modal');
+                    this.fetchData();
+                    // Reset
+                    form.reset();
+                    form.id.value = '';
+                    const container = form.querySelector('.image-uploader');
+                    container.querySelector('.preview-img').classList.add('hidden');
+                    container.querySelector('.placeholder').classList.remove('hidden');
+                }
+            }
+
+            openSubcategoryModal(catId) {
+                const form = document.getElementById('subcategory-form');
+                form.reset();
+                form.category_id.value = catId;
+                form.id.value = ''; // Ensure clear ID for new adds
+                document.getElementById('subcategory-modal-title').textContent = 'New Subcategory';
+                this.openModal('subcategory-modal');
+            }
+
+            editSubcategory(id, name, catId) {
+                const form = document.getElementById('subcategory-form');
+                form.id.value = id;
+                form.name.value = name;
+                form.category_id.value = catId;
+                document.getElementById('subcategory-modal-title').textContent = 'Edit Subcategory';
+                this.openModal('subcategory-modal');
+            }
+
+            async saveSubcategory(e) {
+                e.preventDefault();
+                const form = e.target;
+                const id = form.id.value;
+                const data = {
+                    name: form.name.value,
+                    category_id: form.category_id.value
+                };
+
+                let res;
+                if(id) {
+                    res = await this.supabase.from('subcategories').update(data).eq('id', id);
+                } else {
+                    res = await this.supabase.from('subcategories').insert(data);
+                }
+
+                if (res.error) this.showToast(res.error.message, 'error');
+                else {
+                    this.showToast(id ? 'Subcategory Updated' : 'Subcategory Added', 'success');
+                    this.closeModal('subcategory-modal');
+                    this.fetchData();
+                    form.reset();
+                }
+            }
+            
+            // --- DELETION LOGIC ---
+            confirmDelete(type, id) {
+                this.openModal('delete-modal');
+                const btn = document.getElementById('confirm-delete-btn');
+                btn.onclick = async () => {
+                    let table = 'products';
+                    if (type === 'category') table = 'categories';
+                    if (type === 'subcategory') table = 'subcategories';
+                    
+                    const { error } = await this.supabase.from(table).delete().eq('id', id);
+                    if (error) this.showToast('Error deleting item', 'error');
+                    else {
+                        this.showToast('Item deleted', 'success');
+                        this.fetchData();
+                    }
+                    this.closeModal('delete-modal');
+                };
+            }
+
+            // --- CAMERA & EDITOR (Existing Logic) ---
             async openCamera() {
                 const overlay = document.getElementById('camera-overlay');
                 const video = document.getElementById('main-camera-feed');
-                
                 overlay.classList.remove('hidden');
-                
                 try {
-                    // Request constraints for environment facing camera + advanced features
-                    const constraints = { 
-                        video: { 
-                            facingMode: 'environment',
-                            width: { ideal: 1920 },
-                            height: { ideal: 1080 }
-                        } 
-                    };
-
+                    const constraints = { video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } };
                     this.stream = await navigator.mediaDevices.getUserMedia(constraints);
                     video.srcObject = this.stream;
-
-                    // Check Capabilities (Flash/Zoom)
                     const track = this.stream.getVideoTracks()[0];
                     const capabilities = track.getCapabilities();
-
-                    // Flash UI
                     const flashBtn = document.getElementById('camera-flash');
-                    if (capabilities.torch) flashBtn.classList.remove('hidden');
-                    else flashBtn.classList.add('hidden');
-
-                    // Zoom UI
+                    if (capabilities.torch) flashBtn.classList.remove('hidden'); else flashBtn.classList.add('hidden');
                     const zoomContainer = document.getElementById('zoom-container');
                     const zoomSlider = document.getElementById('zoom-slider');
                     if (capabilities.zoom) {
@@ -660,13 +845,10 @@
                         zoomSlider.min = capabilities.zoom.min;
                         zoomSlider.max = capabilities.zoom.max;
                         zoomSlider.step = capabilities.zoom.step;
-                    } else {
-                        zoomContainer.classList.add('hidden');
-                    }
-
+                    } else zoomContainer.classList.add('hidden');
                 } catch (err) {
                     console.error("Camera Error", err);
-                    this.showToast('Camera access denied or unavailable', 'error');
+                    this.showToast('Camera access denied', 'error');
                     this.closeCamera();
                 }
             }
@@ -674,8 +856,6 @@
             closeCamera() {
                 const overlay = document.getElementById('camera-overlay');
                 overlay.classList.add('hidden');
-                
-                // Stop stream
                 if (this.stream) {
                     this.stream.getTracks().forEach(track => track.stop());
                     this.stream = null;
@@ -687,110 +867,76 @@
                 const track = this.stream.getVideoTracks()[0];
                 const settings = track.getSettings();
                 const isTorchOn = settings.torch || false;
-                
                 try {
                     await track.applyConstraints({ advanced: [{ torch: !isTorchOn }] });
                     const btn = document.getElementById('camera-flash');
                     btn.classList.toggle('text-yellow-400', !isTorchOn);
                     btn.classList.toggle('text-white', isTorchOn);
-                } catch (e) {
-                    console.error('Flash toggle failed', e);
-                }
+                } catch (e) { console.error('Flash toggle failed', e); }
             }
 
             async setZoom(val) {
                 if (!this.stream) return;
                 const track = this.stream.getVideoTracks()[0];
-                try {
-                    await track.applyConstraints({ advanced: [{ zoom: parseFloat(val) }] });
-                } catch (e) { console.error(e); }
+                try { await track.applyConstraints({ advanced: [{ zoom: parseFloat(val) }] }); } catch (e) { console.error(e); }
             }
 
             capturePhoto() {
                 const video = document.getElementById('main-camera-feed');
                 const canvas = document.getElementById('camera-temp-canvas');
-                
-                // High res capture
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(video, 0, 0);
-
                 canvas.toBlob((blob) => {
                     this.closeCamera();
-                    // Open Editor with this blob
                     this.loadImageIntoEditor(blob);
                 }, 'image/jpeg', 0.95);
             }
 
-            // --- EDITOR LOGIC ---
             async loadImageIntoEditor(blobOrFile) {
                 const editor = document.getElementById('image-editor');
                 editor.classList.remove('hidden');
-
-                // Create bitmap
                 this.editorImage = await createImageBitmap(blobOrFile);
-                
-                // Reset settings
                 this.editorSettings = { brightness: 100, contrast: 100, blueBg: false, crop: false };
                 document.getElementById('edit-brightness').value = 100;
                 document.getElementById('edit-contrast').value = 100;
-
                 this.renderEditor();
             }
 
             renderEditor() {
                 if (!this.editorImage) return;
-
                 const cvs = this.editorCanvas;
                 const ctx = this.editorCtx;
                 const { width, height } = this.editorImage;
-                
-                // Determine dimensions based on crop
                 let drawWidth = width;
                 let drawHeight = height;
                 let sx = 0, sy = 0;
-
                 if (this.editorSettings.crop) {
-                    // Square crop from center
                     const size = Math.min(width, height);
                     sx = (width - size) / 2;
                     sy = (height - size) / 2;
                     drawWidth = size;
                     drawHeight = size;
                 }
-
                 cvs.width = drawWidth;
                 cvs.height = drawHeight;
-
-                // Clear
                 ctx.clearRect(0, 0, cvs.width, cvs.height);
-
-                // 1. Blue Background (Passport style backing)
                 if (this.editorSettings.blueBg) {
-                    ctx.fillStyle = '#0066cc'; // Standard ID blue
+                    ctx.fillStyle = '#0066cc';
                     ctx.fillRect(0, 0, cvs.width, cvs.height);
-                    
-                    // Note: If image is JPEG (no transparency), this just sits behind it.
-                    // For a true "Passport Mode", we might scale the image down slightly to show blue border?
-                    // Let's scale image down 85% to show blue background frame for passport look if it's opaque
                     const scale = 0.85;
                     const w = cvs.width * scale;
                     const h = cvs.height * scale;
                     const x = (cvs.width - w) / 2;
                     const y = (cvs.height - h) / 2;
-
-                    // Draw Image smaller on top
-                    // Apply Filters before drawing
                     ctx.filter = `brightness(${this.editorSettings.brightness}%) contrast(${this.editorSettings.contrast}%)`;
                     ctx.drawImage(this.editorImage, sx, sy, drawWidth, drawHeight, x, y, w, h);
                 } else {
-                    // Normal Draw
                     ctx.filter = `brightness(${this.editorSettings.brightness}%) contrast(${this.editorSettings.contrast}%)`;
                     ctx.drawImage(this.editorImage, sx, sy, drawWidth, drawHeight, 0, 0, cvs.width, cvs.height);
                 }
-                
-                ctx.filter = 'none'; // reset
+                ctx.filter = 'none';
             }
 
             closeEditor() {
@@ -800,44 +946,27 @@
 
             async saveEditedImage() {
                 const cvs = this.editorCanvas;
-                const editor = document.getElementById('image-editor');
-                
-                // Show loading on "Done" button
                 const btn = document.getElementById('editor-save');
                 btn.textContent = 'Uploading...';
-                
                 cvs.toBlob(async (blob) => {
                     const file = new File([blob], `edit_${Date.now()}.jpg`, { type: 'image/jpeg' });
-                    
-                    // Upload to Supabase
                     if (this.activeUploader) {
                         const loader = this.activeUploader.querySelector('.loading-overlay');
                         const hiddenInput = this.activeUploader.querySelector('.final-url-input');
                         const previewImg = this.activeUploader.querySelector('.preview-img');
                         const placeholder = this.activeUploader.querySelector('.placeholder');
-
-                        this.closeEditor(); // Close editor immediately
+                        this.closeEditor();
                         if(loader) loader.classList.remove('hidden');
-
                         try {
                             const fileName = `${Date.now()}_edited.jpg`;
-                            const { data, error } = await this.supabase.storage
-                                .from('images')
-                                .upload(fileName, file);
-
+                            const { data, error } = await this.supabase.storage.from('images').upload(fileName, file);
                             if (error) throw error;
-
-                            const { data: { publicUrl } } = this.supabase.storage
-                                .from('images')
-                                .getPublicUrl(fileName);
-
+                            const { data: { publicUrl } } = this.supabase.storage.from('images').getPublicUrl(fileName);
                             hiddenInput.value = publicUrl;
                             previewImg.src = publicUrl;
                             previewImg.classList.remove('hidden');
                             if(placeholder) placeholder.classList.add('hidden');
-                            
                             this.showToast('Image Saved', 'success');
-
                         } catch (err) {
                             console.error(err);
                             this.showToast('Upload Failed', 'error');
@@ -850,18 +979,11 @@
             }
 
             // --- STANDARD APP LOGIC ---
-
             async handleLogin(e) {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
-                
-                const { data, error } = await this.supabase
-                    .from('admins')
-                    .select('password')
-                    .eq('email', email)
-                    .single();
-
+                const { data, error } = await this.supabase.from('admins').select('password').eq('email', email).single();
                 if (!error && data && data.password === password) {
                     sessionStorage.setItem('isAdminLoggedIn', 'true');
                     this.showDashboard();
@@ -872,13 +994,8 @@
             }
 
             showDashboard() {
-                const loginView = document.getElementById('login-view');
-                const mainContent = document.getElementById('main-content');
-                loginView.classList.add('opacity-0', 'pointer-events-none');
-                setTimeout(() => loginView.classList.add('hidden'), 300);
-                mainContent.classList.remove('hidden');
-                void mainContent.offsetWidth; 
-                mainContent.classList.remove('opacity-0', 'pointer-events-none');
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden', 'opacity-0', 'pointer-events-none');
             }
 
             async fetchData() {
@@ -888,13 +1005,10 @@
                         this.supabase.from('categories').select('*, subcategories(*)').order('name'),
                         this.supabase.from('orders').select('*, order_items(*)').order('created_at', { ascending: false })
                     ]);
-
                     if (productsRes.error) throw productsRes.error;
-
                     this.products = productsRes.data;
                     this.categories = categoriesRes.data;
                     this.orders = ordersRes.data;
-
                     this.renderAll();
                     this.showToast('Inventory Synced', 'success');
                 } catch (err) {
@@ -939,26 +1053,6 @@
                 `).join('');
             }
 
-            renderCategories() {
-                const container = document.getElementById('categories-list');
-                container.innerHTML = this.categories.map(c => `
-                    <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex justify-between items-start">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden">
-                                ${c.image_url ? `<img src="${c.image_url}" class="w-full h-full object-cover">` : '<i class="ph ph-tag text-xl text-slate-400"></i>'}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-slate-800">${c.name}</h3>
-                                <p class="text-xs text-slate-500">${c.subcategories?.length || 0} Subcategories</p>
-                            </div>
-                        </div>
-                        <button onclick="app.openSubcategoryModal(${c.id})" class="w-8 h-8 rounded-full bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors">
-                            <i class="ph ph-plus-bold"></i>
-                        </button>
-                    </div>
-                `).join('');
-            }
-
             renderOrders() {
                 const container = document.getElementById('order-list');
                 container.innerHTML = this.orders.map(o => `
@@ -993,24 +1087,20 @@
                 document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
                 document.getElementById(this.currentSection).classList.remove('hidden');
                 
-                // Titles
                 const titles = {'products-section': 'Inventory', 'categories-section': 'Categories', 'orders-section': 'Sales Orders'};
                 document.getElementById('page-title').textContent = titles[this.currentSection];
 
-                // Desktop Nav Active State
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     const active = btn.dataset.target === this.currentSection;
                     btn.className = `nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold rounded-2xl transition-all ${active ? 'bg-slate-50 text-brand-red' : 'text-slate-600 hover:bg-slate-50 hover:text-brand-red'}`;
                 });
 
-                // Mobile Nav Active State
                 document.querySelectorAll('.nav-btn-mobile').forEach(btn => {
                     const active = btn.dataset.target === this.currentSection;
                     btn.classList.toggle('text-brand-red', active);
                     btn.classList.toggle('text-slate-400', !active);
                 });
 
-                // FAB
                 const fab = document.getElementById('fab');
                 if(this.currentSection === 'orders-section') fab.classList.add('scale-0');
                 else fab.classList.remove('scale-0');
@@ -1020,20 +1110,16 @@
             editProduct(id) {
                 const p = this.products.find(x => x.id === id);
                 if (!p) return;
-                
                 const form = document.getElementById('product-form');
                 form.id.value = p.id;
                 form.name.value = p.name;
                 form.price.value = p.price;
                 form.condition.value = p.condition;
                 form.subcategory_id.value = p.subcategory_id;
-                
-                // Reset Image UI
                 const container = form.querySelector('.image-uploader');
                 const prev = container.querySelector('.preview-img');
                 const place = container.querySelector('.placeholder');
                 const inp = container.querySelector('.final-url-input');
-                
                 inp.value = p.thumbnail_url || '';
                 if(p.thumbnail_url) {
                     prev.src = p.thumbnail_url;
@@ -1043,7 +1129,6 @@
                     prev.classList.add('hidden');
                     place.classList.remove('hidden');
                 }
-
                 document.getElementById('product-modal-title').textContent = 'Edit Product';
                 this.openModal('product-modal');
             }
@@ -1053,44 +1138,27 @@
                 const form = e.target;
                 const formData = new FormData(form);
                 const id = formData.get('id');
-
                 const data = {
                     name: formData.get('name'),
                     price: parseFloat(formData.get('price')),
                     condition: formData.get('condition'),
                     subcategory_id: parseInt(formData.get('subcategory_id'))
                 };
-
                 let res;
-                if (id) {
-                    res = await this.supabase.from('products').update(data).eq('id', id);
-                } else {
-                    res = await this.supabase.from('products').insert(data).select().single();
-                }
+                if (id) res = await this.supabase.from('products').update(data).eq('id', id);
+                else res = await this.supabase.from('products').insert(data).select().single();
 
-                if (res.error) {
-                    this.showToast(res.error.message, 'error');
-                } else {
-                    // Update Image if changed
+                if (res.error) this.showToast(res.error.message, 'error');
+                else {
                     const newId = id || res.data.id;
                     const imgUrl = formData.get('thumbnail_url');
-                    
                     if (imgUrl) {
-                        // Clear old main thumbnails
                         await this.supabase.from('product_images').delete().match({ product_id: newId, is_thumbnail: true });
-                        // Add new
-                        await this.supabase.from('product_images').insert({
-                            product_id: newId,
-                            image_url: imgUrl,
-                            is_thumbnail: true
-                        });
+                        await this.supabase.from('product_images').insert({ product_id: newId, image_url: imgUrl, is_thumbnail: true });
                     }
-
                     this.showToast('Product Saved', 'success');
                     this.closeModal('product-modal');
                     this.fetchData();
-                    
-                    // Reset
                     form.reset();
                     form.id.value = '';
                     const container = form.querySelector('.image-uploader');
@@ -1100,76 +1168,24 @@
                 }
             }
 
-            async saveCategory(e) {
-                e.preventDefault();
-                const form = e.target;
-                const formData = new FormData(form);
-                
-                const { error } = await this.supabase.from('categories').insert({
-                    name: formData.get('name'),
-                    image_url: formData.get('image_url')
-                });
-
-                if (error) this.showToast(error.message, 'error');
-                else {
-                    this.showToast('Category Created', 'success');
-                    this.closeModal('category-modal');
-                    this.fetchData();
-                    form.reset();
-                    // Reset image UI...
-                    const container = form.querySelector('.image-uploader');
-                    container.querySelector('.preview-img').classList.add('hidden');
-                    container.querySelector('.placeholder').classList.remove('hidden');
-                }
-            }
-
-            openSubcategoryModal(catId) {
-                document.getElementById('subcategory-form').category_id.value = catId;
-                this.openModal('subcategory-modal');
-            }
-
-            async saveSubcategory(e) {
-                e.preventDefault();
-                const form = e.target;
-                const { error } = await this.supabase.from('subcategories').insert({
-                    name: form.name.value,
-                    category_id: form.category_id.value
-                });
-
-                if (error) this.showToast(error.message, 'error');
-                else {
-                    this.showToast('Subcategory Added', 'success');
-                    this.closeModal('subcategory-modal');
-                    this.fetchData();
-                    form.reset();
-                }
-            }
-
-            confirmDelete(type, id) {
-                this.openModal('delete-modal');
-                const btn = document.getElementById('confirm-delete-btn');
-                btn.onclick = async () => {
-                    const table = type === 'product' ? 'products' : 'categories';
-                    const { error } = await this.supabase.from(table).delete().eq('id', id);
-                    if (error) this.showToast('Error deleting item', 'error');
-                    else {
-                        this.showToast('Item deleted', 'success');
-                        this.fetchData();
-                    }
-                    this.closeModal('delete-modal');
-                };
-            }
-
             openModal(id) {
                 const modal = document.getElementById(id);
                 modal.classList.remove('hidden');
                 void modal.offsetWidth;
                 modal.classList.remove('opacity-0');
                 modal.querySelector('div').classList.remove('translate-y-full', 'scale-95');
-                
-                // Clear form if product modal opened for "Add" (no ID)
                 if (id === 'product-modal' && !document.querySelector('#product-form [name="id"]').value) {
                     document.getElementById('product-modal-title').textContent = 'Add Product';
+                }
+                if (id === 'category-modal' && !document.querySelector('#category-form [name="id"]').value) {
+                    document.getElementById('category-modal-title').textContent = 'New Category';
+                    document.getElementById('category-submit-btn').textContent = 'Create Category';
+                    // clear image
+                    const form = document.getElementById('category-form');
+                    const container = form.querySelector('.image-uploader');
+                    container.querySelector('.preview-img').classList.add('hidden');
+                    container.querySelector('.placeholder').classList.remove('hidden');
+                    container.querySelector('.final-url-input').value = '';
                 }
             }
 
@@ -1184,16 +1200,11 @@
                 const container = document.getElementById('toast-container');
                 const el = document.createElement('div');
                 const colors = type === 'success' ? 'bg-slate-900 text-white' : type === 'error' ? 'bg-red-600 text-white' : 'bg-white text-slate-900 border border-slate-200';
-                
                 el.className = `${colors} px-6 py-4 rounded-2xl shadow-xl flex items-center gap-3 font-bold transform -translate-y-10 opacity-0 transition-all duration-300`;
                 el.innerHTML = `<i class="ph ph-${type === 'success' ? 'check-circle' : 'warning-circle'} text-xl"></i> ${msg}`;
-                
                 container.appendChild(el);
                 requestAnimationFrame(() => el.classList.remove('-translate-y-10', 'opacity-0'));
-                setTimeout(() => {
-                    el.classList.add('-translate-y-10', 'opacity-0');
-                    setTimeout(() => el.remove(), 300);
-                }, 3000);
+                setTimeout(() => { el.classList.add('-translate-y-10', 'opacity-0'); setTimeout(() => el.remove(), 300); }, 3000);
             }
         }
 
