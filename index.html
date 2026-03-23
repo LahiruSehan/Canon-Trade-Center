@@ -1206,6 +1206,51 @@
     @media (max-width: 640px) {
         .mobile-search-row.open ~ main .mobile-search-open-spacer { display: block; }
     }
+
+    /* ====== WISHLIST ====== */
+    .p-wishlist-btn { position:absolute;bottom:0.5rem;left:0.5rem;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.92);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:0.82rem;color:#999;transition:all 0.2s;backdrop-filter:blur(4px);z-index:2; }
+    .p-wishlist-btn:hover,.p-wishlist-btn.active { color:#e84545;transform:scale(1.15); }
+    .p-wishlist-btn.active i { font-weight:900; }
+    .btn-wishlist-detail { background:none;border:1.5px solid var(--border);border-radius:10px;padding:0.75rem 1rem;font-size:0.88rem;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:0.4rem;transition:all 0.2s;font-family:inherit; }
+    .btn-wishlist-detail:hover,.btn-wishlist-detail.active { border-color:#e84545;color:#e84545; }
+    .btn-wishlist-detail.active i { font-weight:900; }
+
+    /* ====== RECENTLY VIEWED ====== */
+    #recently-viewed-section { padding-top:0.5rem; }
+    #recently-viewed-section .section-title { font-size:0.95rem; }
+
+    /* ====== NOTIFY IN STOCK ====== */
+    .notify-stock-wrap { margin-top:1rem;padding:1rem;background:rgba(var(--primary-rgb,232,69,69),0.04);border:1px dashed rgba(232,69,69,0.25);border-radius:12px; }
+
+    /* ====== SEARCH AUTOCOMPLETE ====== */
+    .search-wrap { position:relative; }
+    .search-autocomplete { position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.12);z-index:1000;overflow:hidden;max-height:280px;overflow-y:auto;display:none; }
+    .search-autocomplete.open { display:block; }
+    .autocomplete-item { padding:0.65rem 1rem;cursor:pointer;font-size:0.87rem;color:var(--text-1);transition:background 0.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .autocomplete-item:hover { background:var(--bg-2); }
+
+    /* ====== FLASH SALE BANNER ====== */
+    .flash-sale-banner { background:linear-gradient(90deg,#1a1a2e 0%,#e84545 50%,#1a1a2e 100%);color:white;border-radius:14px;margin-bottom:1.25rem;overflow:hidden; }
+    .flash-sale-inner { display:flex;align-items:center;gap:1rem;padding:0.75rem 1.1rem;flex-wrap:wrap; }
+    .flash-sale-left { font-size:0.9rem;display:flex;align-items:center;gap:0.5rem;flex:1;min-width:fit-content; }
+    .flash-sale-timer { display:flex;align-items:center;gap:0.3rem; }
+    .flash-unit { display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.15);border-radius:8px;padding:0.3rem 0.6rem;min-width:44px; }
+    .flash-unit span { font-size:1.2rem;font-weight:800;line-height:1; }
+    .flash-unit small { font-size:0.58rem;text-transform:uppercase;opacity:0.8;margin-top:1px; }
+    .flash-sep { font-size:1.1rem;font-weight:700;opacity:0.6; }
+    .flash-sale-close { background:rgba(255,255,255,0.2);border:none;color:white;border-radius:50%;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0; }
+
+    /* ====== COOKIE CONSENT ====== */
+    .cookie-banner { position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border);padding:0.85rem 1rem;z-index:8000;box-shadow:0 -4px 20px rgba(0,0,0,0.1); }
+    .cookie-inner { max-width:900px;margin:0 auto;display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;font-size:0.83rem;color:var(--text-2); }
+    .cookie-accept-btn { background:var(--primary);color:white;border:none;border-radius:8px;padding:0.45rem 1rem;font-size:0.82rem;font-weight:600;cursor:pointer;white-space:nowrap; }
+    .cookie-decline-btn { background:var(--bg-2);color:var(--text-2);border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.9rem;font-size:0.82rem;cursor:pointer;white-space:nowrap; }
+
+    /* ====== ORDER EXTRAS ====== */
+    .order-est-delivery { font-size:0.72rem;color:#2563eb;margin-top:2px; }
+    [data-theme="dark"] .order-est-delivery { color:#60a5fa; }
+    .order-action-btn { background:none;border:1px solid var(--border);border-radius:8px;padding:0.45rem 0.75rem;font-size:0.77rem;cursor:pointer;color:var(--text-2);font-family:inherit;transition:all 0.2s;display:flex;align-items:center;gap:0.35rem;white-space:nowrap; }
+    .order-action-btn:hover { background:var(--bg-2);border-color:var(--primary);color:var(--primary); }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -1279,6 +1324,23 @@
             <div class="trust-item"><i class="fa fa-rotate-left"></i><span>Easy Returns</span></div>
         </div>
 
+        <!-- Flash Sale Banner -->
+        <div id="flash-sale-banner" class="flash-sale-banner" style="display:none;">
+            <div class="flash-sale-inner">
+                <div class="flash-sale-left"><i class="fa fa-bolt" style="color:#facc15;"></i> <strong>FLASH SALE</strong> — Ends in:</div>
+                <div class="flash-sale-timer">
+                    <span class="flash-unit"><span id="fs-days">00</span><small>Days</small></span>
+                    <span class="flash-sep">:</span>
+                    <span class="flash-unit"><span id="fs-hours">00</span><small>Hrs</small></span>
+                    <span class="flash-sep">:</span>
+                    <span class="flash-unit"><span id="fs-mins">00</span><small>Min</small></span>
+                    <span class="flash-sep">:</span>
+                    <span class="flash-unit"><span id="fs-secs">00</span><small>Sec</small></span>
+                </div>
+                <button class="flash-sale-close" onclick="document.getElementById('flash-sale-banner').style.display='none'"><i class="fa fa-xmark"></i></button>
+            </div>
+        </div>
+
         <section id="category-section">
             <div class="section-header">
                 <div class="section-title"><span class="section-title-dot"></span> Browse Categories</div>
@@ -1329,6 +1391,7 @@
         </div>
 
         <div id="pagination" class="pagination"></div>
+        <div id="recently-viewed-section" style="display:none;margin-top:2rem;"><div class="section-header"><div class="section-title"><span class="section-title-dot"></span> Recently Viewed</div></div><div class="product-grid" id="recently-viewed-grid" style="margin-top:0.75rem;"></div></div>
         <div id="detail-view" class="detail-view"></div>
     </div>
 </main>
@@ -1624,12 +1687,12 @@
                             <div class="pay-option-sub">Pay when your order arrives at your door</div>
                         </div>
                     </label>
-                    <!-- Bank Transfer — coming soon -->
-                    <label class="pay-option disabled-option" style="pointer-events:none;">
-                        <input type="radio" name="payment" value="bank" disabled>
-                        <span class="pay-option-icon"><i class="fa fa-building-columns"></i></span>
+                    <!-- Bank Transfer -->
+                    <label class="pay-option" onclick="App.onPaymentChange()">
+                        <input type="radio" name="payment" value="bank" id="pay-bank" onchange="App.onPaymentChange()">
+                        <span class="pay-option-icon" style="background:rgba(37,99,235,0.1);color:#2563eb;"><i class="fa fa-building-columns"></i></span>
                         <div>
-                            <div class="pay-option-text">Bank Transfer <span class="coming-soon-tag"><i class="fa fa-clock"></i> Coming Soon</span></div>
+                            <div class="pay-option-text">Bank Transfer <span style="background:rgba(34,197,94,0.12);color:#16a34a;border:1px solid rgba(34,197,94,0.25);border-radius:99px;font-size:0.65rem;font-weight:700;padding:0.15rem 0.55rem;margin-left:0.4rem;">✓ Available</span></div>
                             <div class="pay-option-sub">Bank deposit & online transfers</div>
                         </div>
                     </label>
@@ -1654,6 +1717,19 @@
                 </div>
             </div>
 
+            <div id="bank-transfer-info" style="display:none;margin-top:0.75rem;background:rgba(37,99,235,0.06);border:1px solid rgba(37,99,235,0.18);border-radius:12px;padding:1rem 1.1rem;">
+                <div style="font-weight:700;font-size:0.85rem;margin-bottom:0.6rem;color:#2563eb;"><i class="fa fa-building-columns" style="margin-right:0.4rem;"></i>Bank Transfer Details</div>
+                <div style="font-size:0.82rem;line-height:1.9;color:var(--text-2);">
+                    <div><strong>Bank:</strong> Bank of Ceylon (BOC)</div>
+                    <div><strong>Account Name:</strong> Canon Trade Center</div>
+                    <div><strong>Account No:</strong> 0000000 <span style="font-size:0.72rem;color:var(--text-3);">(update this)</span></div>
+                    <div><strong>Branch:</strong> Colombo Main</div>
+                </div>
+                <div style="margin-top:0.65rem;font-size:0.78rem;color:var(--text-3);background:var(--bg-2);border-radius:8px;padding:0.6rem 0.75rem;">
+                    <i class="fa fa-info-circle" style="margin-right:0.3rem;color:#2563eb;"></i>
+                    After transferring, send your payment slip via <strong>WhatsApp</strong> to +94 777 301 189 with your order number. Your order will be confirmed once payment is verified.
+                </div>
+            </div>
             <div id="checkout-koko-info" style="margin-top:0.75rem;"></div>
 
             <button type="submit" class="btn-submit" id="submit-btn">
@@ -1836,6 +1912,7 @@ const App = {
     categories: [],
     cart: JSON.parse(localStorage.getItem('ctc_cart') || '[]'),
     orders: JSON.parse(localStorage.getItem('ctc_orders') || '[]'),
+    wishlist: JSON.parse(localStorage.getItem('ctc_wishlist') || '[]'),
     activeCategory: 'all',
     activeSub: 'all',
     searchQuery: '',
@@ -1848,6 +1925,7 @@ const App = {
     activeOrderTab: 'all',
     currentUser: null,
     _subcatsHidden: false,
+    _pendingCancelId: null,
 
     /* ====== INIT ====== */
     async init() {
@@ -1859,6 +1937,8 @@ const App = {
             this.setupSearch();
             this.checkMobile();
             this.setupHeaderScroll();
+            this.initFlashSale();
+            this.initCookieConsent();
             window.addEventListener('resize', () => this.checkMobile());
             await this.fetchData();
             this.renderCategories();
@@ -2208,6 +2288,7 @@ const App = {
             });
         });
         this.renderPagination(totalPages);
+        this.renderRecentlyViewed();
     },
 
     productCardHTML(p) {
@@ -2227,6 +2308,7 @@ const App = {
                     : `<div class="p-img-placeholder"><i class="fa fa-camera"></i></div>`}
                 ${!isOut ? `<button class="p-quick-add" onclick="event.stopPropagation(); App.addToCart(${p.id})" title="Add to cart"><i class="fa fa-plus"></i></button>` : ''}
                 <button class="p-share-btn" onclick="event.stopPropagation(); App.openFlyerModal(${p.id})" title="Share"><i class="fa fa-share-nodes"></i></button>
+                <button class="p-wishlist-btn${this.wishlist.includes(p.id) ? ' active' : ''}" data-id="${p.id}" onclick="event.stopPropagation(); App.toggleWishlist(${p.id})" title="Wishlist"><i class="fa fa-heart"></i></button>
             </div>
             <div class="p-tag-wrap">
                 ${hasDiscount ? `<span class="p-tag discount"><i class="fa fa-tag"></i> ${Math.round(p.discount_percent)}% OFF</span>` : ''}
@@ -2299,6 +2381,7 @@ const App = {
     showDetail(id) {
         const p = this.products.find(x => x.id === id);
         if (!p) return;
+        this._trackRecentlyViewed(p.id);
         const price = p.final_price || p.price;
         const hasDiscount = p.discount_percent > 0 && p.price > 0;
         const stock = p.stock_quantity || 0;
@@ -2323,7 +2406,7 @@ const App = {
             <button class="back-btn" onclick="App.hideDetail()"><i class="fa fa-arrow-left"></i> Back to Products</button>
             <div class="detail-grid">
                 <div class="detail-img-main">
-                    ${p.image ? `<img src="${p.image}" alt="${p.name}" onerror="this.src=''">` : `<div class="p-img-placeholder" style="font-size:5rem; height:100%; display:flex; align-items:center; justify-content:center;"><i class="fa fa-camera"></i></div>`}
+                    ${p.image ? `<img src="${p.image}" alt="${p.name}" style="cursor:zoom-in;" onclick="App.zoomImage('${p.image.replace(/'/g,"\\'")}','${p.name.replace(/'/g,"\\'")}')\" onerror="this.src=''">` : `<div class="p-img-placeholder" style="font-size:5rem; height:100%; display:flex; align-items:center; justify-content:center;"><i class="fa fa-camera"></i></div>`}
                     ${hasDiscount ? `<span class="p-tag discount" style="position:absolute;top:1rem;left:1rem;font-size:0.85rem;padding:0.4rem 0.9rem;"><i class="fa fa-tag"></i> ${Math.round(p.discount_percent)}% OFF</span>` : ''}
                 </div>
                 <div class="detail-info">
@@ -2369,7 +2452,15 @@ const App = {
                         ${!isOut ? `<button class="btn-buy-now" onclick="App.buyNow(${p.id})"><i class="fa fa-bolt"></i> Buy Now</button>` : ''}
                         <button class="btn-whatsapp" onclick="App.contactWhatsApp(${p.id})"><i class="fab fa-whatsapp"></i></button>
                         <button class="btn-add-to-cart" onclick="App.openFlyerModal(${p.id})" style="flex:0 0 auto;padding:0.8rem;"><i class="fa fa-share-nodes"></i></button>
+                        <button class="btn-wishlist-detail${this.wishlist.includes(p.id) ? ' active' : ''}" id="detail-wishlist-btn" onclick="App.toggleWishlist(${p.id})"><i class="fa fa-heart"></i> <span id="detail-wishlist-label">${this.wishlist.includes(p.id) ? 'Wishlisted' : 'Wishlist'}</span></button>
                     </div>
+                    ${isOut ? `<div class="notify-stock-wrap">
+                        <p style="font-size:0.82rem;color:var(--text-3);margin-bottom:0.5rem;"><i class="fa fa-bell"></i> Get notified when back in stock:</p>
+                        <div style="display:flex;gap:0.5rem;align-items:center;">
+                            <input type="email" class="form-input" id="notify-email-${p.id}" placeholder="your@email.com" style="flex:1;font-size:0.85rem;padding:0.6rem 0.85rem;">
+                            <button class="btn-add-to-cart" style="flex:0 0 auto;white-space:nowrap;" onclick="App.notifyWhenInStock(${p.id})"><i class="fa fa-bell"></i> Notify Me</button>
+                        </div>
+                    </div>` : ''}
                 </div>
             </div>
             ${related.length ? `<div class="related-section">
@@ -3152,6 +3243,13 @@ Thank you! 🙏`;
         }
     },
 
+    async _hashPassword(password) {
+        const msgBuffer = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+
     async doRegister() {
         const name = document.getElementById('reg-name').value.trim();
         const phone = document.getElementById('reg-phone').value.trim();
@@ -3171,7 +3269,8 @@ Thank you! 🙏`;
                 btn.disabled = false; btn.innerHTML = '<i class="fa fa-user-plus"></i> Create Account';
                 return;
             }
-            const { data, error } = await db.from('customers').insert([{ name, phone, email, address, password }]).select().single();
+            const hashed = await this._hashPassword(password);
+            const { data, error } = await db.from('customers').insert([{ name, phone, email, address, password: hashed }]).select().single();
             if (error) throw error;
             this.currentUser = { id: data.id, name: data.name, email: data.email, phone: data.phone, address: data.address };
             localStorage.setItem('ctc_user', JSON.stringify(this.currentUser));
@@ -3195,8 +3294,20 @@ Thank you! 🙏`;
         btn.disabled = true; btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Logging in...';
 
         try {
-            const { data, error } = await db.from('customers').select('*').eq('email', email).eq('password', password).maybeSingle();
+            const hashed = await this._hashPassword(password);
+            // Try hashed password first
+            let { data, error } = await db.from('customers').select('*').eq('email', email).eq('password', hashed).maybeSingle();
             if (error) throw error;
+            // Fallback: try plaintext (migration for old accounts)
+            if (!data) {
+                const res = await db.from('customers').select('*').eq('email', email).eq('password', password).maybeSingle();
+                if (res.error) throw res.error;
+                data = res.data;
+                // Upgrade plaintext to hashed
+                if (data) {
+                    await db.from('customers').update({ password: hashed }).eq('id', data.id);
+                }
+            }
             if (!data) {
                 this.toast('Invalid email or password.', 'error');
                 btn.disabled = false; btn.innerHTML = '<i class="fa fa-right-to-bracket"></i> Login';
@@ -3282,8 +3393,28 @@ Thank you! 🙏`;
             this.currentPage = 1;
             this.renderProducts();
         };
-        mainInput.addEventListener('input', e => { if (mobileInput) mobileInput.value = e.target.value; handleSearch(e.target.value); });
-        if (mobileInput) mobileInput.addEventListener('input', e => { mainInput.value = e.target.value; handleSearch(e.target.value); });
+        const showSuggestions = (val, inputEl) => {
+            let dropdown = document.getElementById('search-autocomplete');
+            if (!dropdown) {
+                dropdown = document.createElement('div');
+                dropdown.id = 'search-autocomplete';
+                dropdown.className = 'search-autocomplete';
+                inputEl.parentNode.appendChild(dropdown);
+            }
+            const q = val.toLowerCase().trim();
+            if (!q || q.length < 2) { dropdown.innerHTML = ''; dropdown.classList.remove('open'); return; }
+            const matches = this.products.filter(p => p.name.toLowerCase().includes(q) || (p.subcategory || '').toLowerCase().includes(q)).slice(0, 7);
+            if (!matches.length) { dropdown.innerHTML = ''; dropdown.classList.remove('open'); return; }
+            dropdown.innerHTML = matches.map(p => `<div class="autocomplete-item" onclick="App._selectSuggestion('${p.name.replace(/'/g,"\\'").replace(/"/g,'&quot;')}')"><i class="fa fa-search" style="color:var(--text-3);font-size:0.75rem;margin-right:0.5rem;"></i>${p.name}</div>`).join('');
+            dropdown.classList.add('open');
+        };
+        const hideAutocomplete = () => { const d = document.getElementById('search-autocomplete'); if (d) { d.classList.remove('open'); } };
+        mainInput.addEventListener('input', e => { if (mobileInput) mobileInput.value = e.target.value; handleSearch(e.target.value); showSuggestions(e.target.value, mainInput); });
+        mainInput.addEventListener('blur', () => setTimeout(hideAutocomplete, 200));
+        if (mobileInput) {
+            mobileInput.addEventListener('input', e => { mainInput.value = e.target.value; handleSearch(e.target.value); showSuggestions(e.target.value, mobileInput); });
+            mobileInput.addEventListener('blur', () => setTimeout(hideAutocomplete, 200));
+        }
     },
 
     clearSearch() {
@@ -3411,6 +3542,7 @@ Thank you! 🙏`;
                     <div>
                         <div class="order-id">${order.order_number || '#' + String(order.id).slice(0,8)}</div>
                         <div class="order-date">${dateStr} · ${timeStr} · LKR ${order.total_price?.toLocaleString()}</div>
+                        ${['pending','processing','shipped'].includes(order.status) ? `<div class="order-est-delivery"><i class="fa fa-truck" style="margin-right:0.25rem;color:var(--primary);"></i>Est. delivery: ${App._calcEstDelivery(order.created_at, order.status)}</div>` : ''}
                     </div>
                     <div style="display:flex;align-items:center;gap:0.5rem;">
                         <span class="order-status-badge status-${order.status}">${order.status?.charAt(0).toUpperCase() + order.status?.slice(1)}</span>
@@ -3460,6 +3592,8 @@ Thank you! 🙏`;
                         <button class="order-action-btn" onclick="App.contactOrderWhatsApp('${order.id}')">
                             <i class="fa-brands fa-whatsapp" style="color:#25d366;"></i> WhatsApp Support
                         </button>
+                        <button class="order-action-btn" onclick="App.reorderItems('${order.id}')"><i class="fa fa-rotate-right"></i> Reorder</button>
+                        <button class="order-action-btn" onclick="App.downloadInvoice('${order.id}')"><i class="fa fa-file-invoice"></i> Invoice</button>
                         ${order.status === 'pending' ? `<button class="order-action-btn" style="color:var(--primary);border-color:var(--primary);" onclick="App.cancelOrder('${order.id}')"><i class="fa fa-times"></i> Cancel</button>` : ''}
                     </div>
                 </div>
@@ -3476,12 +3610,31 @@ Thank you! 🙏`;
         }
     },
 
-    async cancelOrder(id) {
+    cancelOrder(id) {
+        this._pendingCancelId = id;
+        document.getElementById('cancel-reason-select').value = '';
+        document.getElementById('cancel-reason-other-group').style.display = 'none';
+        document.getElementById('cancel-reason-other').value = '';
+        document.getElementById('cancel-reason-modal').classList.add('open');
+    },
+    _onCancelReasonChange() {
+        const val = document.getElementById('cancel-reason-select').value;
+        document.getElementById('cancel-reason-other-group').style.display = val === 'Other' ? '' : 'none';
+    },
+    async _confirmCancel() {
+        const select = document.getElementById('cancel-reason-select');
+        const reason = select.value === 'Other'
+            ? (document.getElementById('cancel-reason-other').value.trim() || 'Other')
+            : select.value;
+        if (!reason) { this.toast('Please select a reason.', 'error'); return; }
+        const id = this._pendingCancelId;
         const order = this.orders.find(o => String(o.id) === String(id));
         if (!order) return;
         order.status = 'cancelled';
+        order.cancel_reason = reason;
         localStorage.setItem('ctc_orders', JSON.stringify(this.orders));
-        await db.from('orders').update({ status: 'cancelled' }).eq('id', id);
+        await db.from('orders').update({ status: 'cancelled', cancel_reason: reason }).eq('id', id);
+        this.closeModal('cancel-reason-modal');
         this.renderOrders();
         this.toast('Order cancelled.', 'error');
     },
@@ -3693,10 +3846,13 @@ I need assistance with this order. Please help! 🙏`;
     onPaymentChange() {
         const method = document.querySelector('input[name="payment"]:checked')?.value || 'cod';
         const btn = document.getElementById('submit-btn');
+        const bankInfo = document.getElementById('bank-transfer-info');
         if (btn) {
             if (method === 'payhere') btn.innerHTML = '<i class="fa fa-credit-card"></i> Pay Online with PayHere';
+            else if (method === 'bank') btn.innerHTML = '<i class="fa fa-building-columns"></i> Place Order (Bank Transfer)';
             else btn.innerHTML = '<i class="fa fa-check-circle"></i> Place Order';
         }
+        if (bankInfo) bankInfo.style.display = method === 'bank' ? '' : 'none';
     },
 
     updateCheckoutSummary() {
@@ -3789,9 +3945,279 @@ I need assistance with this order. Please help! 🙏`;
             custom_2: note.slice(0, 100)
         });
     },
+
+    /* ====== WISHLIST ====== */
+    toggleWishlist(id) {
+        const idx = this.wishlist.indexOf(id);
+        if (idx >= 0) { this.wishlist.splice(idx, 1); this.toast('Removed from wishlist', 'success'); }
+        else { this.wishlist.push(id); this.toast('Added to wishlist ❤️', 'success'); }
+        localStorage.setItem('ctc_wishlist', JSON.stringify(this.wishlist));
+        this._updateWishlistUI(id);
+    },
+    _updateWishlistUI(id) {
+        const isWishlisted = this.wishlist.includes(id);
+        document.querySelectorAll(`.p-wishlist-btn[data-id="${id}"]`).forEach(btn => btn.classList.toggle('active', isWishlisted));
+        const detailBtn = document.getElementById('detail-wishlist-btn');
+        const detailLabel = document.getElementById('detail-wishlist-label');
+        if (detailBtn) detailBtn.classList.toggle('active', isWishlisted);
+        if (detailLabel) detailLabel.textContent = isWishlisted ? 'Wishlisted' : 'Wishlist';
+        this.renderProducts();
+    },
+
+    /* ====== RECENTLY VIEWED ====== */
+    _trackRecentlyViewed(id) {
+        let rv = JSON.parse(localStorage.getItem('ctc_rv') || '[]');
+        rv = rv.filter(x => x !== id);
+        rv.unshift(id);
+        rv = rv.slice(0, 10);
+        localStorage.setItem('ctc_rv', JSON.stringify(rv));
+    },
+    renderRecentlyViewed() {
+        const section = document.getElementById('recently-viewed-section');
+        const grid = document.getElementById('recently-viewed-grid');
+        if (!section || !grid) return;
+        const ids = JSON.parse(localStorage.getItem('ctc_rv') || '[]');
+        const items = ids.map(id => this.products.find(p => p.id === id)).filter(Boolean).slice(0, 6);
+        if (items.length < 2) { section.style.display = 'none'; return; }
+        section.style.display = '';
+        grid.innerHTML = items.map(p => this.productCardHTML(p)).join('');
+        setTimeout(() => {
+            grid.querySelectorAll('.product-card').forEach((card, i) => {
+                card.style.transitionDelay = `${i * 30}ms`;
+                card.classList.add('visible');
+            });
+        }, 50);
+    },
+
+    /* ====== NOTIFY WHEN IN STOCK ====== */
+    notifyWhenInStock(id) {
+        const p = this.products.find(x => x.id === id);
+        const emailEl = document.getElementById(`notify-email-${id}`);
+        const email = emailEl?.value?.trim();
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { this.toast('Please enter a valid email.', 'error'); return; }
+        let subs = JSON.parse(localStorage.getItem('ctc_notify_subs') || '[]');
+        const existing = subs.find(s => s.product_id === id && s.email === email);
+        if (existing) { this.toast('You\'re already on the notify list for this product!', 'success'); return; }
+        subs.push({ product_id: id, product_name: p?.name || '', email, created_at: new Date().toISOString() });
+        localStorage.setItem('ctc_notify_subs', JSON.stringify(subs));
+        if (emailEl) emailEl.value = '';
+        this.toast(`We'll notify ${email} when "${p?.name}" is back in stock!`, 'success');
+    },
+
+    /* ====== IMAGE ZOOM ====== */
+    zoomImage(src, alt) {
+        const overlay = document.getElementById('img-zoom-overlay');
+        const img = document.getElementById('img-zoom-img');
+        if (!overlay || !img) return;
+        img.src = src;
+        img.alt = alt || '';
+        overlay.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    },
+    closeZoom() {
+        const overlay = document.getElementById('img-zoom-overlay');
+        if (overlay) overlay.style.display = 'none';
+        document.body.style.overflow = '';
+    },
+
+    /* ====== REORDER ====== */
+    reorderItems(id) {
+        const order = this.orders.find(o => String(o.id) === String(id));
+        if (!order || !order.items?.length) { this.toast('No items found in this order.', 'error'); return; }
+        let added = 0;
+        for (const item of order.items) {
+            const prod = this.products.find(p => p.id === item.id);
+            const stock = prod?.stock_quantity || 0;
+            if (stock <= 0) continue;
+            const existing = this.cart.find(c => c.id === item.id);
+            if (existing) existing.qty = Math.min(existing.qty + (item.qty || 1), stock);
+            else this.cart.push({ id: item.id, name: item.name, price: item.price || prod?.final_price || prod?.price || 0, image: item.image || prod?.image || '', qty: Math.min(item.qty || 1, stock) });
+            added++;
+        }
+        if (added === 0) { this.toast('All items from this order are currently out of stock.', 'error'); return; }
+        this.saveCart();
+        this.toast(`${added} item(s) added to cart!`, 'success');
+        this.closeOrders();
+        setTimeout(() => this.toggleCart(), 300);
+    },
+
+    /* ====== ESTIMATED DELIVERY ====== */
+    _calcEstDelivery(createdAt, status) {
+        const d = new Date(createdAt);
+        const days = status === 'shipped' ? 1 : status === 'processing' ? 2 : 4;
+        d.setDate(d.getDate() + days);
+        return d.toLocaleDateString('en-LK', { weekday:'short', day:'numeric', month:'short' });
+    },
+
+    /* ====== INVOICE / PDF ====== */
+    downloadInvoice(id) {
+        const order = this.orders.find(o => String(o.id) === String(id));
+        if (!order) return;
+        const date = new Date(order.created_at).toLocaleDateString('en-LK', { day:'numeric', month:'long', year:'numeric' });
+        const itemsHtml = (order.items || []).map(item => `
+            <tr>
+                <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;">${item.name}</td>
+                <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${item.qty}</td>
+                <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;">LKR ${item.price?.toLocaleString()}</td>
+                <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;">LKR ${(item.price * item.qty)?.toLocaleString()}</td>
+            </tr>`).join('');
+        const payLabel = { cod: 'Cash on Delivery', payhere: 'PayHere (Online)', bank: 'Bank Transfer' }[order.payment_method] || order.payment_method;
+        const css = [
+            'body{font-family:Arial,sans-serif;color:#1a1a1a;max-width:700px;margin:40px auto;padding:20px;}',
+            '.header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;border-bottom:3px solid #e84545;padding-bottom:20px;}',
+            '.logo{font-size:1.5rem;font-weight:800;color:#e84545;}',
+            '.logo span{display:block;font-size:0.78rem;font-weight:400;color:#666;margin-top:2px;}',
+            '.invoice-meta{text-align:right;font-size:0.85rem;color:#555;}',
+            '.invoice-meta strong{color:#1a1a1a;font-size:1.1rem;display:block;margin-bottom:4px;}',
+            '.addresses{display:flex;justify-content:space-between;margin-bottom:28px;gap:20px;}',
+            '.addr-box{flex:1;background:#f9f9f9;border-radius:8px;padding:14px 16px;font-size:0.83rem;}',
+            '.addr-box h4{margin:0 0 8px;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:#888;}',
+            'table{width:100%;border-collapse:collapse;margin-bottom:20px;}',
+            'thead th{background:#e84545;color:white;padding:10px 12px;text-align:left;font-size:0.8rem;text-transform:uppercase;}',
+            'thead th:nth-child(2){text-align:center;}thead th:nth-child(3),thead th:nth-child(4){text-align:right;}',
+            '.totals{margin-left:auto;width:280px;}',
+            '.total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:0.88rem;border-bottom:1px solid #f0f0f0;}',
+            '.total-row.grand{font-weight:700;font-size:1rem;border-bottom:none;color:#e84545;border-top:2px solid #e84545;padding-top:10px;margin-top:4px;}',
+            '.status-badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#dcfce7;color:#16a34a;}',
+            '.footer{margin-top:40px;border-top:1px solid #eee;padding-top:16px;font-size:0.75rem;color:#999;text-align:center;}',
+            '@media print{body{margin:0;}button{display:none;}}'
+        ].join('\n');
+        const deliveryRow = order.customer_address !== 'PICKUP' ? '<div class="total-row"><span>Delivery Fee</span><span>LKR 350</span></div>' : '';
+        const addrLine = order.customer_address && order.customer_address !== 'PICKUP' ? '<br>' + order.customer_address : '';
+        const fulfillment = order.customer_address === 'PICKUP' ? 'Store Pickup' : 'Delivery';
+        const subtotal = (order.total_price - (order.customer_address !== 'PICKUP' ? 350 : 0));
+        const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice ' + order.order_number + '</title>'
+            + '<style>' + css + '<\/style><\/head><body>'
+            + '<div class="header"><div class="logo">Canon Trade Center<span>by Sandul Computers \xB7 Sri Lanka</span></div>'
+            + '<div class="invoice-meta"><strong>INVOICE</strong>' + order.order_number + '<br>Date: ' + date + '<br>Status: <span class="status-badge">' + order.status + '</span></div></div>'
+            + '<div class="addresses">'
+            + '<div class="addr-box"><h4>Bill To</h4><strong>' + order.customer_name + '</strong><br>' + order.customer_phone + '<br>' + order.customer_city + addrLine + '</div>'
+            + '<div class="addr-box"><h4>Payment</h4>' + payLabel + '<br><br><h4>Fulfillment</h4>' + fulfillment + '</div>'
+            + '</div>'
+            + '<table><thead><tr><th>Item</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead><tbody>' + itemsHtml + '<\/tbody><\/table>'
+            + '<div class="totals">'
+            + '<div class="total-row"><span>Subtotal</span><span>LKR ' + subtotal?.toLocaleString() + '</span></div>'
+            + deliveryRow
+            + '<div class="total-row grand"><span>Grand Total</span><span>LKR ' + order.total_price?.toLocaleString() + '</span></div>'
+            + '</div>'
+            + '<div class="footer">Thank you for shopping with Canon Trade Center \xB7 WhatsApp: +94 777 301 189 \xB7 canontradecenter.com</div>'
+            + '<br><button onclick="window.print()" style="padding:10px 24px;background:#e84545;color:white;border:none;border-radius:8px;font-size:0.9rem;cursor:pointer;font-weight:600;">\uD83D\uDDA8\uFE0F Print \/ Save as PDF</button>'
+            + '<\/body><\/html>';
+        const w = window.open('', '_blank');
+        if (w) { w.document.write(html); w.document.close(); }
+    },
+
+    /* ====== SEARCH AUTOCOMPLETE ====== */
+    _selectSuggestion(name) {
+        const mainInput = document.getElementById('search-input');
+        const mobileInput = document.getElementById('search-input-mobile');
+        if (mainInput) mainInput.value = name;
+        if (mobileInput) mobileInput.value = name;
+        const clearBtn = document.getElementById('search-clear');
+        if (clearBtn) clearBtn.classList.add('visible');
+        this.searchQuery = name.toLowerCase().trim();
+        const hero = document.getElementById('hero-slider');
+        const trust = document.getElementById('trust-strip');
+        if (hero) hero.classList.add('hero-hidden');
+        if (trust) trust.style.display = 'none';
+        this.currentPage = 1;
+        this.renderProducts();
+        const d = document.getElementById('search-autocomplete');
+        if (d) d.classList.remove('open');
+    },
+
+    /* ====== FLASH SALE ====== */
+    initFlashSale() {
+        // Set your flash sale end date here (YYYY, MM-1, DD, HH, MM, SS)
+        const endDate = new Date(2025, 3, 30, 23, 59, 59); // April 30, 2025
+        const banner = document.getElementById('flash-sale-banner');
+        const now = new Date();
+        if (!banner || now >= endDate) return;
+        banner.style.display = '';
+        const tick = () => {
+            const diff = endDate - new Date();
+            if (diff <= 0) { banner.style.display = 'none'; return; }
+            const days = Math.floor(diff / 86400000);
+            const hrs = Math.floor((diff % 86400000) / 3600000);
+            const mins = Math.floor((diff % 3600000) / 60000);
+            const secs = Math.floor((diff % 60000) / 1000);
+            const pad = n => String(n).padStart(2, '0');
+            document.getElementById('fs-days').textContent = pad(days);
+            document.getElementById('fs-hours').textContent = pad(hrs);
+            document.getElementById('fs-mins').textContent = pad(mins);
+            document.getElementById('fs-secs').textContent = pad(secs);
+            setTimeout(tick, 1000);
+        };
+        tick();
+    },
+
+    /* ====== COOKIE CONSENT ====== */
+    initCookieConsent() {
+        const consent = localStorage.getItem('ctc_cookie_consent');
+        if (!consent) {
+            setTimeout(() => {
+                const banner = document.getElementById('cookie-banner');
+                if (banner) banner.style.display = '';
+            }, 2000);
+        }
+    },
+    acceptCookies() {
+        localStorage.setItem('ctc_cookie_consent', 'accepted');
+        const banner = document.getElementById('cookie-banner');
+        if (banner) banner.style.display = 'none';
+    },
+    declineCookies() {
+        localStorage.setItem('ctc_cookie_consent', 'declined');
+        const banner = document.getElementById('cookie-banner');
+        if (banner) banner.style.display = 'none';
+    },
 };
 
 document.addEventListener('DOMContentLoaded', () => App.init());
 </script>
+
+<!-- =========== IMAGE ZOOM LIGHTBOX =========== -->
+<div id="img-zoom-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;cursor:zoom-out;" onclick="App.closeZoom()">
+    <button style="position:absolute;top:1.25rem;right:1.5rem;background:none;border:none;color:white;font-size:1.8rem;cursor:pointer;z-index:10000;" onclick="App.closeZoom()"><i class="fa fa-xmark"></i></button>
+    <img id="img-zoom-img" src="" alt="" style="max-width:92vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,0.6);">
+</div>
+
+<!-- =========== CANCEL REASON MODAL =========== -->
+<div class="modal-wrap" id="cancel-reason-modal">
+    <div class="modal" style="max-width:420px;">
+        <button class="modal-close" onclick="App.closeModal('cancel-reason-modal')"><i class="fa fa-xmark"></i></button>
+        <h2 class="modal-title"><i class="fa fa-times-circle" style="color:var(--primary);margin-right:0.5rem;"></i>Cancel Order</h2>
+        <p class="modal-subtitle">Please tell us why you're cancelling</p>
+        <div class="form-group">
+            <label class="form-label">Reason</label>
+            <select class="form-input" id="cancel-reason-select" onchange="App._onCancelReasonChange()">
+                <option value="">Select a reason...</option>
+                <option value="Changed my mind">Changed my mind</option>
+                <option value="Found a better price">Found a better price</option>
+                <option value="Ordered by mistake">Ordered by mistake</option>
+                <option value="Delivery taking too long">Delivery taking too long</option>
+                <option value="Item no longer needed">Item no longer needed</option>
+                <option value="Other">Other (please specify)</option>
+            </select>
+        </div>
+        <div class="form-group" id="cancel-reason-other-group" style="display:none;">
+            <label class="form-label">Please specify</label>
+            <input type="text" class="form-input" id="cancel-reason-other" placeholder="Tell us more...">
+        </div>
+        <button class="btn-submit" onclick="App._confirmCancel()" id="cancel-confirm-btn"><i class="fa fa-times"></i> Confirm Cancellation</button>
+    </div>
+</div>
+
+<!-- =========== COOKIE CONSENT =========== -->
+<div id="cookie-banner" class="cookie-banner" style="display:none;">
+    <div class="cookie-inner">
+        <i class="fa fa-cookie-bite" style="font-size:1.3rem;color:var(--primary);flex-shrink:0;"></i>
+        <span>We use cookies to improve your experience and remember your preferences.</span>
+        <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+            <button class="cookie-accept-btn" onclick="App.acceptCookies()">Accept</button>
+            <button class="cookie-decline-btn" onclick="App.declineCookies()">Decline</button>
+        </div>
+    </div>
+</div>
 </body>
 </html>
